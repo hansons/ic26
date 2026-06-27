@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IC26 — Emergence: Personal to Planetary</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #1a2744;
+      --blue:   #2c4a8a;
+      --sky:    #4a7ab5;
+      --gold:   #c9a84c;
+      --light:  #f0f4fb;
+      --white:  #ffffff;
+      --text:   #1e2d3d;
+      --muted:  #5a6a7e;
+      --border: #d0dae8;
+    }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: var(--light);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(160deg, var(--navy) 0%, var(--blue) 60%, var(--sky) 100%);
+      color: var(--white);
+      text-align: center;
+      padding: 3.5rem 1.5rem 3rem;
+    }
+    .hero-eyebrow {
+      font-family: Arial, sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 0.75rem;
+    }
+    .hero h1 {
+      font-size: clamp(1.75rem, 5vw, 3rem);
+      font-weight: normal;
+      line-height: 1.2;
+      margin-bottom: 0.4rem;
+    }
+    .hero-theme {
+      font-size: clamp(1rem, 3vw, 1.4rem);
+      color: var(--gold);
+      font-style: italic;
+      margin-bottom: 1.5rem;
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem 2.5rem;
+      font-family: Arial, sans-serif;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.85);
+    }
+    .hero-meta span { display: flex; align-items: center; gap: 0.4rem; }
+
+    /* ── NAV PILLS ── */
+    .quick-nav {
+      background: var(--navy);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.25rem;
+      padding: 0.6rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .quick-nav a {
+      font-family: Arial, sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      padding: 0.3rem 0.8rem;
+      border-radius: 2rem;
+      transition: background 0.15s, color 0.15s;
+    }
+    .quick-nav a:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+    /* ── LAYOUT ── */
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
+
+    section { padding: 2.5rem 0; border-bottom: 1px solid var(--border); }
+    section:last-of-type { border-bottom: none; }
+
+    h2 {
+      font-size: 1.4rem;
+      font-weight: normal;
+      color: var(--navy);
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--gold);
+      display: inline-block;
+    }
+
+    /* ── SCHEDULE ── */
+    .schedule-day {
+      margin-bottom: 2rem;
+    }
+    .day-header {
+      background: var(--navy);
+      color: var(--white);
+      font-family: Arial, sans-serif;
+      font-size: 0.85rem;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.5rem 1rem;
+      border-radius: 4px 4px 0 0;
+    }
+    .day-sessions {
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 4px 4px;
+      overflow: hidden;
+    }
+    .session {
+      display: grid;
+      grid-template-columns: 7rem 1fr;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.92rem;
+    }
+    .session:last-child { border-bottom: none; }
+    .session-time {
+      background: var(--light);
+      padding: 0.65rem 0.8rem;
+      font-family: Arial, sans-serif;
+      font-size: 0.8rem;
+      color: var(--muted);
+      border-right: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      padding-top: 0.7rem;
+    }
+    .session-body {
+      padding: 0.65rem 1rem;
+    }
+    .session-title {
+      font-weight: bold;
+      color: var(--text);
+    }
+    .session-note {
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-family: Arial, sans-serif;
+      margin-top: 0.2rem;
+    }
+    .session.highlight .session-body { background: #fdf8ee; }
+    .session.highlight .session-title { color: var(--blue); }
+    .session.tbd .session-title { color: var(--muted); font-style: italic; }
+
+    /* ── PRE-CONF BANNER ── */
+    .preconf-banner {
+      background: linear-gradient(135deg, #e8f0fb, #d4e4f7);
+      border: 1px solid var(--sky);
+      border-radius: 6px;
+      padding: 1.1rem 1.25rem;
+      margin-bottom: 1.75rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .preconf-banner .icon { font-size: 1.5rem; flex-shrink: 0; }
+    .preconf-banner strong { display: block; color: var(--navy); margin-bottom: 0.2rem; }
+    .preconf-banner p { font-size: 0.88rem; font-family: Arial, sans-serif; color: var(--muted); }
+
+    /* ── MAP ── */
+    .map-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .map-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: Arial, sans-serif;
+      font-size: 0.85rem;
+      padding: 0.5rem 1.1rem;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: opacity 0.15s;
+    }
+    .map-btn:hover { opacity: 0.85; }
+    .map-btn.primary { background: var(--blue); color: #fff; }
+    .map-btn.secondary { background: #fff; color: var(--blue); border: 1px solid var(--blue); }
+
+    .building-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .building-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.75rem 1rem;
+      font-family: Arial, sans-serif;
+      font-size: 0.85rem;
+    }
+    .building-card strong { color: var(--navy); display: block; margin-bottom: 0.15rem; }
+    .building-card span { color: var(--muted); font-size: 0.8rem; }
+
+    /* ── LOGISTICS ── */
+    .logistics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    .logistics-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem 1.1rem;
+    }
+    .logistics-card .card-label {
+      font-family: Arial, sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--sky);
+      font-weight: bold;
+      margin-bottom: 0.4rem;
+    }
+    .logistics-card p {
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+    .logistics-card a { color: var(--blue); }
+
+    /* ── GALA ── */
+    .gala-block {
+      background: linear-gradient(135deg, #1a2744, #2c4a8a);
+      color: #fff;
+      border-radius: 8px;
+      padding: 1.5rem 1.5rem;
+      margin-top: 0.5rem;
+    }
+    .gala-block h3 { font-weight: normal; font-size: 1.2rem; margin-bottom: 0.3rem; color: var(--gold); }
+    .gala-block p { font-size: 0.9rem; color: rgba(255,255,255,0.85); font-family: Arial, sans-serif; line-height: 1.5; }
+
+    /* ── REGISTRATION STATUS ── */
+    .reg-status {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    .reg-card {
+      border-radius: 5px;
+      padding: 0.75rem 1rem;
+      font-family: Arial, sans-serif;
+      font-size: 0.85rem;
+      border: 1px solid transparent;
+    }
+    .reg-card strong { display: block; margin-bottom: 0.2rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .reg-card.open { background: #edfaf3; border-color: #5cb88a; color: #1a5c38; }
+    .reg-card.closed { background: #fef2f2; border-color: #e8a0a0; color: #7c2020; }
+    .reg-card.soldout { background: #fdf4e7; border-color: #d4a84b; color: #6b4400; }
+
+    /* ── CONTACT ── */
+    .contact-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 2rem;
+      font-family: Arial, sans-serif;
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+    .contact-row a { color: var(--blue); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--navy);
+      color: rgba(255,255,255,0.55);
+      text-align: center;
+      font-family: Arial, sans-serif;
+      font-size: 0.78rem;
+      padding: 1.5rem 1rem;
+    }
+    footer a { color: rgba(255,255,255,0.75); }
+
+    @media (max-width: 540px) {
+      .session { grid-template-columns: 6rem 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <p class="hero-eyebrow">The Urantia Book Fellowship · International Conference</p>
+  <h1>IC26</h1>
+  <p class="hero-theme">"Emergence: Personal to Planetary"</p>
+  <div class="hero-meta">
+    <span>&#128197; July 12–16, 2026</span>
+    <span>&#127961; Asilomar Conference Grounds</span>
+    <span>&#128205; Pacific Grove, CA</span>
+  </div>
+</div>
+
+<!-- ── QUICK NAV ── -->
+<nav class="quick-nav">
+  <a href="#schedule">Schedule</a>
+  <a href="#map">Campus Map</a>
+  <a href="#arrival">Arrival</a>
+  <a href="#gala">Gala</a>
+  <a href="#registration">Registration</a>
+  <a href="#transportation">Getting Here</a>
+  <a href="#contact">Contact</a>
+</nav>
+
+<div class="container">
+
+  <!-- ── SCHEDULE ── -->
+  <section id="schedule">
+    <h2>Program Schedule</h2>
+
+    <!-- Pre-conference -->
+    <div class="preconf-banner">
+      <div class="icon">&#128187;</div>
+      <div>
+        <strong>Pre-Conference Zoom — Meet &amp; Greet</strong>
+        <p>Tuesday, July 7 &nbsp;·&nbsp; 5:00 PM PT &nbsp;/&nbsp; 6:00 PM MT &nbsp;/&nbsp; 7:00 PM CT &nbsp;/&nbsp; 8:00 PM ET<br>
+        Hosted by Trudi and Aprilhelen — a warm welcome before you arrive.</p>
+      </div>
+    </div>
+
+    <!-- Sunday July 12 -->
+    <div class="schedule-day">
+      <div class="day-header">Sunday, July 12 — Arrival Day</div>
+      <div class="day-sessions">
+        <div class="session highlight">
+          <div class="session-time">1:30–5:00 PM</div>
+          <div class="session-body">
+            <div class="session-title">Conference Check-In</div>
+            <div class="session-note">Marlin Room · Luggage storage available · Canvas bags &amp; thermoses distributed</div>
+          </div>
+        </div>
+        <div class="session tbd">
+          <div class="session-time">Evening</div>
+          <div class="session-body">
+            <div class="session-title">Opening Session — TBA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monday July 13 -->
+    <div class="schedule-day">
+      <div class="day-header">Monday, July 13</div>
+      <div class="day-sessions">
+        <div class="session tbd">
+          <div class="session-time">Morning</div>
+          <div class="session-body"><div class="session-title">Sessions — TBA</div></div>
+        </div>
+        <div class="session tbd">
+          <div class="session-time">Afternoon</div>
+          <div class="session-body"><div class="session-title">Sessions — TBA</div></div>
+        </div>
+        <div class="session tbd">
+          <div class="session-time">Evening</div>
+          <div class="session-body"><div class="session-title">Evening Program — TBA</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tuesday July 14 -->
+    <div class="schedule-day">
+      <div class="day-header">Tuesday, July 14</div>
+      <div class="day-sessions">
+        <div class="session tbd">
+          <div class="session-time">Morning</div>
+          <div class="session-body"><div class="session-title">Sessions — TBA</div></div>
+        </div>
+        <div class="session highlight">
+          <div class="session-time">Afternoon</div>
+          <div class="session-body">
+            <div class="session-title">Secondary Works Panel</div>
+            <div class="session-note">Followed by Secondary Works Networking</div>
+          </div>
+        </div>
+        <div class="session tbd">
+          <div class="session-time">Evening</div>
+          <div class="session-body"><div class="session-title">Evening Program — TBA</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wednesday July 15 -->
+    <div class="schedule-day">
+      <div class="day-header">Wednesday, July 15</div>
+      <div class="day-sessions">
+        <div class="session tbd">
+          <div class="session-time">Morning</div>
+          <div class="session-body"><div class="session-title">Sessions — TBA</div></div>
+        </div>
+        <div class="session tbd">
+          <div class="session-time">Afternoon</div>
+          <div class="session-body"><div class="session-title">Sessions — TBA</div></div>
+        </div>
+        <div class="session highlight">
+          <div class="session-time">Evening</div>
+          <div class="session-body">
+            <div class="session-title">1920s Gala &#x2728;</div>
+            <div class="session-note">Light and Life Band · Music until 11:00 PM · All ages welcome</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thursday July 16 -->
+    <div class="schedule-day">
+      <div class="day-header">Thursday, July 16 — Closing Day</div>
+      <div class="day-sessions">
+        <div class="session tbd">
+          <div class="session-time">Morning</div>
+          <div class="session-body"><div class="session-title">Closing Sessions — TBA</div></div>
+        </div>
+        <div class="session tbd">
+          <div class="session-time">Afternoon</div>
+          <div class="session-body"><div class="session-title">Closing Ceremony — TBA</div></div>
+        </div>
+      </div>
+    </div>
+
+    <p style="font-family:Arial,sans-serif;font-size:0.8rem;color:var(--muted);margin-top:0.75rem;">
+      &#9432; Full session details and speaker names will be added as the program is finalized.
+    </p>
+  </section>
+
+  <!-- ── CAMPUS MAP ── -->
+  <section id="map">
+    <h2>Campus Map</h2>
+    <p style="font-family:Arial,sans-serif;font-size:0.9rem;color:var(--muted);margin-bottom:1rem;">
+      Asilomar Conference Grounds occupies a forested coastal property in Pacific Grove.
+      Download the property map or get directions before you arrive.
+    </p>
+    <div class="map-links">
+      <a class="map-btn primary"
+         href="https://assets.milestoneinternet.com/aramark-parent/asilomar-hotel-and-conference-grounds/pdf/asilomar-grounds-map-20210611.pdf"
+         target="_blank">&#128196; Download Campus Map (PDF)</a>
+      <a class="map-btn secondary"
+         href="https://maps.app.goo.gl/3LigutgWshEg978p8"
+         target="_blank">&#128205; Open in Google Maps</a>
+      <a class="map-btn secondary"
+         href="https://www.visitasilomar.com"
+         target="_blank">&#127968; Visit Asilomar Website</a>
+    </div>
+
+    <div class="building-grid">
+      <div class="building-card">
+        <strong>Marlin Room</strong>
+        <span>Conference check-in · Sunday 1:30–5 PM</span>
+      </div>
+      <div class="building-card">
+        <strong>Merrill Hall</strong>
+        <span>Main plenary venue · No service animals</span>
+      </div>
+      <div class="building-card">
+        <strong>Crocker Dining Hall</strong>
+        <span>Meals included with hotel registration</span>
+      </div>
+      <div class="building-card">
+        <strong>Secondary Works Gallery</strong>
+        <span>Books, art, music, courses · Sun–Thu</span>
+      </div>
+      <div class="building-card">
+        <strong>Asilomar State Beach</strong>
+        <span>Walking distance · Beach trail access</span>
+      </div>
+      <div class="building-card">
+        <strong>Phoebe's Cafe</strong>
+        <span>On-property casual dining</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ARRIVAL ── -->
+  <section id="arrival">
+    <h2>Before You Arrive</h2>
+    <div class="logistics-grid">
+      <div class="logistics-card">
+        <div class="card-label">Check-In</div>
+        <p>Sunday, July 12<br>1:30–5:00 PM<br>Marlin Room<br><br>Luggage storage available if your room isn't ready.</p>
+      </div>
+      <div class="logistics-card">
+        <div class="card-label">What's Waiting for You</div>
+        <p>IC26 canvas bag and 12 oz hot/cold thermos distributed at check-in. Pre-ordered apparel will be available for pickup.</p>
+      </div>
+      <div class="logistics-card">
+        <div class="card-label">Accessibility</div>
+        <p>Service animals must be registered in advance.<br>Contact: <a href="mailto:geoffrey.theiss@urantiabook.org">geoffrey.theiss@<br>urantiabook.org</a><br><br>Service animals are NOT permitted in Merrill Hall.</p>
+      </div>
+      <div class="logistics-card">
+        <div class="card-label">Attire</div>
+        <p>General: casual to business casual.<br><br>Wednesday Gala: 1920s-inspired dress encouraged. Butterfly theme welcome.</p>
+      </div>
+      <div class="logistics-card">
+        <div class="card-label">Apparel Pre-Orders</div>
+        <p>IC26 logo apparel available to pre-order at <a href="https://urantia.printify.me" target="_blank">urantia.printify.me</a> before the event.</p>
+      </div>
+      <div class="logistics-card">
+        <div class="card-label">Give-Away Donations</div>
+        <p>Bringing spiritual or Urantia-related items to donate for the give-away? Contact:<br><a href="mailto:aprilhelen@urantiabook.org">aprilhelen@urantiabook.org</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── GALA ── -->
+  <section id="gala">
+    <h2>Wednesday Night Gala</h2>
+    <div class="gala-block">
+      <h3>The 1920s Gala &#x2728;</h3>
+      <p>
+        Wednesday evening, July 15 &nbsp;·&nbsp; Music until 11:00 PM<br><br>
+        An evening of celebration with live music by the <strong>Light and Life Band</strong>.
+        All ages are welcome. 1920s-inspired attire is encouraged — butterfly-themed touches celebrated.
+      </p>
+    </div>
+  </section>
+
+  <!-- ── REGISTRATION ── -->
+  <section id="registration">
+    <h2>Registration</h2>
+    <div class="reg-status">
+      <div class="reg-card soldout">
+        <strong>Pre-Conference Retreat</strong>
+        Sold Out
+      </div>
+      <div class="reg-card closed">
+        <strong>Hotel (Single)</strong>
+        Closed
+      </div>
+      <div class="reg-card closed">
+        <strong>Hotel (Triple)</strong>
+        Closed
+      </div>
+      <div class="reg-card closed">
+        <strong>Hotel (Quad+)</strong>
+        Closed
+      </div>
+      <div class="reg-card open">
+        <strong>Commuter</strong>
+        Still Available &#10003;
+      </div>
+    </div>
+
+    <p style="font-family:Arial,sans-serif;font-size:0.85rem;color:var(--muted);margin-top:1rem;">
+      Commuter registration is available for day attendees who are arranging their own lodging.
+      Visit the <a href="https://members.urantiabook.org/ic26/register" style="color:var(--blue);">IC26 registration page</a> for details.
+    </p>
+
+    <div style="margin-top:1.25rem;padding:1rem;background:#f0f7ff;border-radius:5px;border:1px solid #b8d4f0;font-family:Arial,sans-serif;font-size:0.85rem;">
+      <strong style="color:var(--navy);">Youth Scholarship Available</strong><br>
+      Ages 18–35 with experience in the Urantia Book community can apply for the
+      <a href="https://members.urantiabook.org/Scholarship" style="color:var(--blue);">David Kulieke Youth Scholarship Fund</a>
+      to support conference attendance. Applications accepted year-round.
+    </div>
+  </section>
+
+  <!-- ── TRANSPORTATION ── -->
+  <section id="transportation">
+    <h2>Getting Here</h2>
+    <div class="logistics-grid">
+      <div class="logistics-card">
+        <div class="card-label">Nearest Airport</div>
+        <p>Monterey Regional Airport (MRY) is closest.<br><br>
+        San Jose (SJC) and San Francisco (SFO) are also served by shuttle.</p>
+      </div>
+      <div class="logistics-card">
+        <div class="card-label">Shuttle Service</div>
+        <p><strong>Groome Transport</strong> operates scheduled shuttles from San Jose and San Francisco airports to Pacific Grove.<br><br>
+        Book directly at the Groome Transport website.</p>
+      </div>
+      <div class="logistics-card">
+        <div class="card-label">Ride-Share Coordination</div>
+        <p>Coordinate rides with other attendees via the IC26 ride-share form on the conference website.</p>
+      </div>
+      <div class="logistics-card">
+        <div class="card-label">Parking</div>
+        <p>Free parking on property. No state park entrance fee required for conference attendees.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:1.25rem;padding:1rem 1.1rem;background:#fff;border:1px solid var(--border);border-radius:5px;font-family:Arial,sans-serif;font-size:0.85rem;">
+      <strong style="color:var(--navy);">Asilomar Address</strong><br>
+      800 Asilomar Avenue, Pacific Grove, CA 93950
+    </div>
+  </section>
+
+  <!-- ── CONTACT ── -->
+  <section id="contact">
+    <h2>Contact &amp; Questions</h2>
+    <div class="contact-row">
+      <span><strong>Conference Coordination:</strong> <a href="mailto:aprilhelen@urantiabook.org">aprilhelen@urantiabook.org</a></span>
+      <span><strong>Accessibility / Service Animals:</strong> <a href="mailto:geoffrey.theiss@urantiabook.org">geoffrey.theiss@urantiabook.org</a></span>
+      <span><strong>Fellowship Phone:</strong> 303-467-7858</span>
+    </div>
+    <div class="contact-row" style="margin-top:0.75rem;">
+      <a href="https://members.urantiabook.org/ic26/">IC26 Official Site</a>
+      <a href="https://members.urantiabook.org/Volunteer">Volunteer</a>
+      <a href="https://members.urantiabook.org/donations">Donate</a>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  International Conference 2026 &nbsp;·&nbsp; The Urantia Book Fellowship, Inc. &nbsp;·&nbsp;
+  <a href="https://members.urantiabook.org/ic26/">members.urantiabook.org/ic26</a>
+</footer>
+
+</body>
+</html>
