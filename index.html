@@ -253,6 +253,18 @@
       color: rgba(255,255,255,0.85);
       flex: 1;
     }
+    .calib-grid {
+      font-family: monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--gold);
+      background: rgba(201,168,76,0.12);
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 3px;
+      padding: 1px 4px;
+      flex-shrink: 0;
+    }
+    .calib-item.waiting .calib-grid { background: rgba(201,168,76,0.25); }
     .calib-check {
       font-size: 0.7rem;
       color: #5cb88a;
@@ -803,23 +815,22 @@
 
 <script>
 // ── BUILDINGS — left/top as % of campus-map.png (1788×1542px) ─────────────
-// Use "📍 Calibrate pin positions" to fine-tune: click a building name in
-// the list, then click its exact spot on the map. Copy all to get the
-// updated values to paste back here.
+// grid = official Asilomar map grid reference (column A-I, row 1-8)
+// Use "📍 Calibrate pin positions" to fine-tune each left/top value.
 const B = {
-  merrill:    { num: 1,  name: 'Merrill Hall',       left: 36.9, top: 35.0, desc: 'Main plenary venue · Evening events · Gallery / Store · Kids drop-off & pick-up' },
-  marlin:     { num: 2,  name: 'Marlin Room',         left: 23.1, top: 32.8, desc: 'Conference check-in · Workshops' },
-  crocker:    { num: 3,  name: 'Crocker Dining Hall', left: 35.1, top: 42.9, desc: 'All meals — Breakfast 7:30 AM · Lunch 12 PM · Dinner 6 PM · Meal card required' },
-  hearst:     { num: 4,  name: 'Hearst Social Hall',  left: 28.7, top: 35.5, desc: 'Hotel check-in · Quiet lounge · Group photo (Thu AM back steps)' },
-  toyon:      { num: 5,  name: 'Toyon',               left: 12.4, top: 24.8, desc: 'Workshop room' },
-  acacia:     { num: 6,  name: 'Acacia',              left: 13.5, top: 25.5, desc: 'Workshop room' },
-  heather:    { num: 7,  name: 'Heather',             left: 13.3, top: 28.5, desc: 'Workshop room' },
-  scripps:    { num: 8,  name: 'Scripps',             left: 20.6, top: 28.5, desc: 'Workshop room' },
-  curlew:     { num: 9,  name: 'Curlew',              left: 20.0, top: 32.4, desc: 'Workshop room' },
-  dolphin:    { num: 10, name: 'Dolphin',             left: 12.1, top: 37.1, desc: 'Workshop room' },
-  nautilus:   { num: 11, name: 'Nautilus / Triton',   left: 56.8, top: 34.4, desc: 'Kids & Teens program (Mon–Wed 9 AM – 12 PM and 2–4:45 PM)' },
-  sanderling: { num: 12, name: 'Sanderling',          left: 12.0, top: 41.7, desc: 'Meditation · Quiet all day · Group sessions 7:10 AM and 5:30 PM' },
-  bonfire:    { num: 13, name: 'Bonfire Pit',         left: 29.6, top: 50.3, desc: 'Outdoor area · BBQ area near Grand Cypress Meadow' },
+  merrill:    { num: 1,  grid: 'G4', name: 'Merrill Hall',       left: 36.9, top: 35.0, desc: 'Main plenary venue · Evening events · Gallery / Store · Kids drop-off & pick-up' },
+  marlin:     { num: 2,  grid: 'D4', name: 'Marlin Room',         left: 23.1, top: 32.8, desc: 'Conference check-in · Workshops' },
+  crocker:    { num: 3,  grid: 'F6', name: 'Crocker Dining Hall', left: 35.1, top: 42.9, desc: 'All meals — Breakfast 7:30 AM · Lunch 12 PM · Dinner 6 PM · Meal card required' },
+  hearst:     { num: 4,  grid: 'E5', name: 'Hearst Social Hall',  left: 28.7, top: 35.5, desc: 'Hotel check-in · Quiet lounge · Group photo (Thu AM back steps)' },
+  toyon:      { num: 5,  grid: 'B4', name: 'Toyon',               left: 12.4, top: 24.8, desc: 'Workshop room' },
+  acacia:     { num: 6,  grid: 'B4', name: 'Acacia',              left: 13.5, top: 25.5, desc: 'Workshop room' },
+  heather:    { num: 7,  grid: 'C4', name: 'Heather',             left: 13.3, top: 28.5, desc: 'Workshop room' },
+  scripps:    { num: 8,  grid: 'D4', name: 'Scripps',             left: 20.6, top: 28.5, desc: 'Workshop room' },
+  curlew:     { num: 9,  grid: 'C4', name: 'Curlew',              left: 20.0, top: 32.4, desc: 'Workshop room' },
+  dolphin:    { num: 10, grid: 'C5', name: 'Dolphin',             left: 12.1, top: 37.1, desc: 'Workshop room' },
+  nautilus:   { num: 11, grid: 'H4', name: 'Nautilus / Triton',   left: 56.8, top: 34.4, desc: 'Kids & Teens program (Mon–Wed 9 AM – 12 PM and 2–4:45 PM)' },
+  sanderling: { num: 12, grid: 'C6', name: 'Sanderling',          left: 12.0, top: 41.7, desc: 'Meditation · Quiet all day · Group sessions 7:10 AM and 5:30 PM' },
+  bonfire:    { num: 13, grid: 'E6', name: 'Bonfire Pit / BBQ',   left: 29.6, top: 50.3, desc: 'Outdoor area · BBQ area near Grand Cypress Meadow' },
 };
 
 // ── SCHEDULE ───────────────────────────────────────────────────────────────
@@ -964,7 +975,7 @@ function buildMarker(id, b, container, clickFn) {
   el.textContent = b.num;
   el.style.left = b.left + '%';
   el.style.top  = b.top  + '%';
-  el.title = b.name;
+  el.title = b.name + (b.grid ? ' · ' + b.grid : '');
   if (clickFn) el.addEventListener('click', (e) => { e.stopPropagation(); clickFn(id, el); });
   container.appendChild(el);
   return el;
@@ -996,6 +1007,7 @@ function buildCalibList() {
     item.innerHTML =
       `<span class="calib-num">${b.num}</span>` +
       `<span class="calib-name">${b.name}</span>` +
+      (b.grid ? `<span class="calib-grid">${b.grid}</span>` : '') +
       `<span class="calib-check" id="ck-${id}"></span>`;
     item.addEventListener('click', () => selectCalibBldg(id));
     list.appendChild(item);
@@ -1011,8 +1023,10 @@ function selectCalibBldg(id) {
   calibSel = id;
   document.getElementById('ci-' + id)?.classList.add('waiting');
   calibMarkers[id]?.classList.add('waiting-place');
+  const b = B[id];
+  const gridHint = b.grid ? ` (map grid ${b.grid})` : '';
   document.getElementById('calib-coords-out').textContent =
-    `← Now click where "${B[id].name}" is on the map`;
+    `← Now click where "${b.name}"${gridHint} is on the map`;
 }
 
 calibWrap.addEventListener('click', (e) => {
@@ -1057,9 +1071,11 @@ function copyCoords() {
     const c = calibCoords[id];
     const l = c ? c.left.toFixed(1) : b.left;
     const t = c ? c.top.toFixed(1)  : b.top;
-    return `  ${id}:    { ..., left: ${l}, top: ${t} }`;
+    const gridNote = b.grid ? `  /* ${b.grid} */` : '';
+    return `  ${id.padEnd(11)}: { num: ${String(b.num).padEnd(2)}, grid: '${b.grid || ''}', name: '${b.name}', left: ${String(l).padEnd(4)}, top: ${String(t).padEnd(4)}, desc: '${b.desc}' },${gridNote}`;
   });
-  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+  const block = 'const B = {\n' + lines.join('\n') + '\n};';
+  navigator.clipboard.writeText(block).then(() => {
     document.querySelector('.copy-btn').textContent = 'Copied!';
     setTimeout(() => document.querySelector('.copy-btn').textContent = 'Copy all', 2000);
   });
