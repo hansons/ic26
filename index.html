@@ -120,7 +120,7 @@
       background: var(--white);
       border-bottom: 2px solid var(--border);
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 0;
       position: sticky;
       top: var(--nav-h);
@@ -128,7 +128,9 @@
       height: var(--day-h);
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
+    .day-nav::-webkit-scrollbar { display: none; }
     .day-tab {
       font-family: Arial, sans-serif;
       font-size: 0.82rem;
