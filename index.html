@@ -129,6 +129,7 @@
     }
     .day-tab:hover { color: var(--navy); }
     .day-tab.active { color: var(--navy); border-bottom-color: var(--gold); }
+    .day-tab-overview { border-right: 1px solid var(--border); margin-right: 0.25rem; padding-right: 1rem; }
     .day-tab-map { border-left: 1px solid var(--border); margin-left: 0.25rem; padding-left: 1rem; }
     .day-tab-map.active { border-bottom-color: var(--blue); }
 
@@ -636,14 +637,15 @@
 <nav class="quick-nav">
   <a href="#schedule">Schedule</a>
   <a href="#campus-map">Campus Map</a>
-  <a href="#arrival">Arrival</a>
-  <a href="#registration">Registration</a>
-  <a href="#transportation">Getting Here</a>
-  <a href="#contact">Contact</a>
+  <a href="#arrival"        onclick="return goOverview('#arrival')">Before You Arrive</a>
+  <a href="#registration"  onclick="return goOverview('#registration')">Registration</a>
+  <a href="#transportation" onclick="return goOverview('#transportation')">Getting Here</a>
+  <a href="#contact"       onclick="return goOverview('#contact')">Contact</a>
 </nav>
 
 <!-- DAY TABS -->
 <div class="day-nav" id="schedule">
+  <button class="day-tab day-tab-overview" data-day="overview">Overview</button>
   <button class="day-tab active" data-day="sun">Sun Jul 12</button>
   <button class="day-tab" data-day="mon">Mon Jul 13</button>
   <button class="day-tab" data-day="tue">Tue Jul 14</button>
@@ -691,7 +693,8 @@
   </div>
 </div>
 
-<!-- LOGISTICS SECTIONS -->
+<!-- OVERVIEW TAB PANEL — shown when the Overview tab is active -->
+<div id="overview-tab-panel" style="display:none;">
 <div class="container">
 
   <section class="logistics" id="arrival">
@@ -789,6 +792,7 @@
   </section>
 
 </div>
+</div><!-- /overview-tab-panel -->
 
 <footer>
   International Conference 2026 &nbsp;·&nbsp; The Urantia Book Fellowship, Inc. &nbsp;·&nbsp;
@@ -1092,6 +1096,17 @@ function copyCoords() {
   });
 }
 
+function showOverviewTab() {
+  document.getElementById('schedule-section').style.display = 'none';
+  document.getElementById('campus-map').style.display = 'none';
+  document.getElementById('overview-tab-panel').style.display = 'block';
+}
+function hideOverviewTab() {
+  document.getElementById('overview-tab-panel').style.display = 'none';
+  document.getElementById('schedule-section').style.display = '';
+  document.getElementById('campus-map').style.display = '';
+}
+
 function showMapTab() {
   document.getElementById('schedule-section').style.display = 'none';
   document.getElementById('campus-map').style.display = 'none';
@@ -1307,13 +1322,29 @@ document.querySelectorAll('.day-tab').forEach(tab => {
     tab.classList.add('active');
     currentDay = tab.dataset.day;
     if (currentDay === 'map') {
+      if (prev === 'overview') hideOverviewTab();
       showMapTab();
+    } else if (currentDay === 'overview') {
+      if (prev === 'map') hideMapTab();
+      showOverviewTab();
     } else {
       if (prev === 'map') hideMapTab();
+      if (prev === 'overview') hideOverviewTab();
       renderDay(currentDay);
     }
   });
 });
+
+function goOverview(anchor) {
+  const prev = currentDay;
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('[data-day="overview"]').classList.add('active');
+  currentDay = 'overview';
+  if (prev === 'map') hideMapTab();
+  showOverviewTab();
+  if (anchor) setTimeout(() => document.querySelector(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  return false;
+}
 
 // Initial render
 renderDay('sun');
