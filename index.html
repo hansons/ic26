@@ -332,11 +332,15 @@
     }
     .map-marker:hover { transform: translate(-50%, -50%) scale(1.15); }
     .map-marker.active {
-      background: var(--gold);
-      border-color: #8a6010;
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(201,168,76,0.7);
+      background: rgba(201, 168, 76, 0.55);
+      border-color: rgba(138, 96, 16, 0.7);
+      color: var(--navy);
+      box-shadow: 0 2px 10px rgba(201,168,76,0.5);
       z-index: 10;
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      border-radius: 0;
+      width: 28px;
+      height: 28px;
     }
     .map-marker.waiting-place {
       background: var(--gold);
@@ -378,20 +382,8 @@
     .agenda-row:last-child { border-bottom: none; }
     .agenda-row:hover { background: #f4f7ff; }
     .agenda-row.active {
-      border-left-color: transparent;
+      border-left-color: var(--gold);
       background: var(--gold-lt);
-    }
-    .agenda-row.active::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 0;
-      height: 0;
-      border-top: 11px solid transparent;
-      border-bottom: 11px solid transparent;
-      border-left: 13px solid rgba(201, 168, 76, 0.55);
     }
     .agenda-row.daily { background: #fafbfc; }
     .agenda-row.daily:hover { background: #f0f4fb; }
