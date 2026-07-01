@@ -969,7 +969,7 @@ for (const [id, b] of Object.entries(B)) {
     if (normalMarkers[bid].classList.contains('active')) clearHighlight();
     else setHighlight(bid);
   }, b.num);
-  calibMarkers[id] = buildMarker(id, b, calibWrap, null, b.grid || b.num);
+  calibMarkers[id] = buildMarker(id, b, calibWrap, (bid) => selectCalibBldg(bid), b.grid || b.num);
 }
 
 // ── CALIBRATION / MAP TAB ─────────────────────────────────────────────────
@@ -999,7 +999,10 @@ function selectCalibBldg(id) {
     calibMarkers[calibSel]?.classList.remove('waiting-place');
   }
   calibSel = id;
-  document.getElementById('ci-' + id)?.classList.add('waiting');
+  const item = document.getElementById('ci-' + id);
+  item?.classList.remove('placed');   // clear placed state so it looks active
+  item?.classList.add('waiting');
+  item?.scrollIntoView({ block: 'nearest' });
   calibMarkers[id]?.classList.add('waiting-place');
   const b = B[id];
   const gridHint = b.grid ? ` (map grid ${b.grid})` : '';
