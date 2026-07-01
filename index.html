@@ -1108,7 +1108,7 @@ function makeWsRow(ws) {
 
   const badge = document.createElement('span');
   badge.className = 'ws-bldg';
-  badge.textContent = (wb.grid ? wb.grid + ' ' : '') + wb.name;
+  badge.textContent = wb.name + (wb.grid ? ' ' + wb.grid : '');
 
   const txt = document.createElement('div');
   txt.className = 'ws-text';
@@ -1172,7 +1172,7 @@ function renderDay(dayKey) {
     if (bldg && !s.workshops) {
       const badge = document.createElement('span');
       badge.className = 'bldg-badge';
-      badge.textContent = (bldg.grid ? bldg.grid + ' ' : '') + bldg.name;
+      badge.textContent = bldg.name + (bldg.grid ? ' ' + bldg.grid : '');
       hd.appendChild(badge);
     }
     body.appendChild(hd);
