@@ -253,14 +253,14 @@
 
     .calib-map-wrap {
       flex: 1;
-      position: relative;
       overflow: auto;
+    }
+    #calib-img-wrap {
       cursor: crosshair;
     }
     .calib-map-wrap img {
       width: 100%;
       display: block;
-      min-width: 600px;
     }
 
     .calib-footer {
@@ -678,8 +678,10 @@
       <!-- items injected by JS -->
     </div>
     <div class="calib-map-wrap" id="calib-map-wrap">
-      <img src="campus-map.png" alt="Campus map" id="campus-map-img-calib" />
-      <!-- calib markers injected by JS -->
+      <div style="position:relative;min-width:600px;" id="calib-img-wrap">
+        <img src="campus-map.png" alt="Campus map" id="campus-map-img-calib" />
+        <!-- calib markers injected by JS -->
+      </div>
     </div>
   </div>
   <div class="calib-footer" id="calib-footer">
@@ -962,7 +964,7 @@ function buildMarker(id, b, container, clickFn, label) {
 }
 
 const normalWrap = document.getElementById('map-normal-wrap');
-const calibWrap  = document.getElementById('calib-map-wrap');
+const calibWrap  = document.getElementById('calib-img-wrap');  // inner div — same box as imgRect
 
 for (const [id, b] of Object.entries(B)) {
   normalMarkers[id] = buildMarker(id, b, normalWrap, (bid) => {
