@@ -373,12 +373,25 @@
       cursor: pointer;
       transition: background 0.1s, border-color 0.1s;
       background: var(--white);
+      position: relative;
     }
     .agenda-row:last-child { border-bottom: none; }
     .agenda-row:hover { background: #f4f7ff; }
     .agenda-row.active {
-      border-left-color: var(--gold);
+      border-left-color: transparent;
       background: var(--gold-lt);
+    }
+    .agenda-row.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-top: 11px solid transparent;
+      border-bottom: 11px solid transparent;
+      border-left: 13px solid rgba(201, 168, 76, 0.55);
     }
     .agenda-row.daily { background: #fafbfc; }
     .agenda-row.daily:hover { background: #f0f4fb; }
