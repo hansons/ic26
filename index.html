@@ -964,6 +964,16 @@ function buildMarker(id, b, container, clickFn, label) {
 const normalWrap = document.getElementById('map-normal-wrap');
 const calibWrap  = document.getElementById('calib-img-wrap');  // inner div — same box as imgRect
 
+// Restore saved pin positions into B before building markers
+(function() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('ic26-pins') || 'null');
+    if (!saved) return;
+    for (const [id, c] of Object.entries(saved))
+      if (B[id] && typeof c.left === 'number') { B[id].left = c.left; B[id].top = c.top; }
+  } catch(e) {}
+})();
+
 for (const [id, b] of Object.entries(B)) {
   normalMarkers[id] = buildMarker(id, b, normalWrap, (bid) => {
     if (normalMarkers[bid].classList.contains('active')) clearHighlight();
@@ -976,17 +986,27 @@ for (const [id, b] of Object.entries(B)) {
 let calibSel = null;   // currently selected bldgId for placement
 const calibCoords = {};  // bldgId → {left, top} — updated during session
 
+// Populate calibCoords from saved positions so checkmarks show correctly
+(function() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('ic26-pins') || 'null');
+    if (!saved) return;
+    for (const [id, c] of Object.entries(saved))
+      if (B[id] && typeof c.left === 'number') calibCoords[id] = c;
+  } catch(e) {}
+})();
+
 function buildCalibList() {
   const list = document.getElementById('calib-bldg-list');
   list.querySelectorAll('.calib-item').forEach(e => e.remove());
   for (const [id, b] of Object.entries(B)) {
     const item = document.createElement('div');
-    item.className = 'calib-item';
+    item.className = 'calib-item' + (calibCoords[id] ? ' placed' : '');
     item.id = 'ci-' + id;
     item.innerHTML =
       `<span class="calib-num">${b.grid || b.num}</span>` +
       `<span class="calib-name">${b.name}</span>` +
-      `<span class="calib-check" id="ck-${id}"></span>`;
+      `<span class="calib-check" id="ck-${id}">${calibCoords[id] ? '✓' : ''}</span>`;
     item.addEventListener('click', () => selectCalibBldg(id));
     list.appendChild(item);
   }
@@ -1031,8 +1051,9 @@ calibWrap.addEventListener('click', (e) => {
   calibMarkers[calibSel]?.classList.remove('waiting-place');
   calibSel = null;
 
-  // Update footer readout
+  // Update footer readout and persist
   updateCalibOut();
+  savePins();
 });
 
 function updateCalibOut() {
@@ -1043,6 +1064,15 @@ function updateCalibOut() {
     return `  ${id.padEnd(10)}: { left: ${l}, top: ${t} }`;
   });
   document.getElementById('calib-coords-out').textContent = lines.join('  |  ');
+}
+
+function savePins() {
+  try {
+    localStorage.setItem('ic26-pins', JSON.stringify(calibCoords));
+    const out = document.getElementById('calib-coords-out');
+    out.textContent = '✓ Saved to browser — positions will survive page reload';
+    setTimeout(updateCalibOut, 2000);
+  } catch(e) {}
 }
 
 function copyCoords() {
