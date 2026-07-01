@@ -321,11 +321,13 @@
       background: var(--gold);
       border-color: #8a6010;
       color: #fff;
-      animation: pulse 1s ease-in-out infinite;
+      z-index: 20;
+      animation: marker-ping 1.4s ease-out infinite;
     }
-    @keyframes pulse {
-      0%, 100% { transform: translate(-50%, -50%) scale(1); }
-      50%       { transform: translate(-50%, -50%) scale(1.3); }
+    @keyframes marker-ping {
+      0%   { transform: translate(-50%,-50%) scale(1);    box-shadow: 0 0 0 0px rgba(201,168,76,0.9), 0 1px 5px rgba(0,0,0,0.4); }
+      65%  { transform: translate(-50%,-50%) scale(1.08); box-shadow: 0 0 0 14px rgba(201,168,76,0),  0 2px 8px  rgba(0,0,0,0.4); }
+      100% { transform: translate(-50%,-50%) scale(1);    box-shadow: 0 0 0 0px  rgba(201,168,76,0),  0 1px 5px  rgba(0,0,0,0.4); }
     }
 
     /* ── SCHEDULE / AGENDA ── */
