@@ -129,6 +129,8 @@
     }
     .day-tab:hover { color: var(--navy); }
     .day-tab.active { color: var(--navy); border-bottom-color: var(--gold); }
+    .day-tab-map { border-left: 1px solid var(--border); margin-left: 0.25rem; padding-left: 1rem; }
+    .day-tab-map.active { border-bottom-color: var(--blue); }
 
     /* ── FULL-WIDTH SCHEDULE ── */
     .schedule-section {
@@ -168,19 +170,6 @@
       margin: 0;
       display: inline;
     }
-    .calib-btn {
-      font-family: Arial, sans-serif;
-      font-size: 0.75rem;
-      font-weight: 700;
-      background: rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.8);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 3px;
-      padding: 0.3rem 0.75rem;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .calib-btn.on { background: var(--gold); color: var(--navy); border-color: #a07820; }
 
     /* Normal map view */
     .map-normal {
@@ -191,14 +180,16 @@
       display: block;
     }
 
-    /* Calibration view */
-    .map-calib {
-      display: none;
-      flex-direction: row;
-      height: 75vh;
-      min-height: 480px;
+    /* Map tab panel */
+    #map-tab-panel {
+      background: #2a2a2a;
     }
-    .map-calib.visible { display: flex; }
+    .map-calib-panel {
+      display: flex;
+      flex-direction: row;
+      height: 78vh;
+      min-height: 500px;
+    }
     .map-normal.hidden { display: none; }
 
     .calib-bldg-list {
@@ -236,15 +227,17 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
+      min-width: 26px;
+      height: 20px;
+      border-radius: 10px;
+      padding: 0 4px;
       background: rgba(255,255,255,0.15);
       color: var(--white);
-      font-family: Arial, sans-serif;
-      font-size: 9px;
+      font-family: monospace;
+      font-size: 10px;
       font-weight: 700;
       flex-shrink: 0;
+      letter-spacing: 0.02em;
     }
     .calib-item.waiting .calib-num { background: var(--gold); color: var(--navy); }
     .calib-name {
@@ -253,18 +246,6 @@
       color: rgba(255,255,255,0.85);
       flex: 1;
     }
-    .calib-grid {
-      font-family: monospace;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--gold);
-      background: rgba(201,168,76,0.12);
-      border: 1px solid rgba(201,168,76,0.3);
-      border-radius: 3px;
-      padding: 1px 4px;
-      flex-shrink: 0;
-    }
-    .calib-item.waiting .calib-grid { background: rgba(201,168,76,0.25); }
     .calib-check {
       font-size: 0.7rem;
       color: #5cb88a;
@@ -632,7 +613,7 @@
 
     /* ── MOBILE ── */
     @media (max-width: 600px) {
-      .map-calib { flex-direction: column; height: auto; }
+      .map-calib-panel { flex-direction: column; height: auto; }
       .calib-bldg-list { width: 100%; height: 180px; }
     }
   </style>
@@ -668,41 +649,40 @@
   <button class="day-tab" data-day="tue">Tue Jul 14</button>
   <button class="day-tab" data-day="wed">Wed Jul 15</button>
   <button class="day-tab" data-day="thu">Thu Jul 16</button>
+  <button class="day-tab day-tab-map" data-day="map">📍 Map</button>
 </div>
 
 <!-- FULL-WIDTH SCHEDULE -->
-<div class="schedule-section">
+<div class="schedule-section" id="schedule-section">
   <div class="events-col" id="events-panel"></div>
 </div>
 
-<!-- CAMPUS MAP (below schedule) -->
+<!-- CAMPUS MAP — normal numbered view (visible on schedule days) -->
 <div class="campus-map-section" id="campus-map">
   <div class="campus-map-hdr">
     <h2>Campus Map · Asilomar Conference Grounds</h2>
-    <button class="calib-btn" id="calib-btn" onclick="toggleCalib()">📍 Calibrate pin positions</button>
   </div>
-
-  <!-- Normal map view -->
   <div class="map-normal" id="map-normal">
     <div style="position:relative;" id="map-normal-wrap">
       <img src="campus-map.png" alt="Asilomar Conference Grounds" id="campus-map-img-normal" />
       <!-- normal markers injected by JS -->
     </div>
   </div>
+</div>
 
-  <!-- Calibration view -->
-  <div class="map-calib" id="map-calib">
+<!-- MAP TAB PANEL — shown when the Map tab is active -->
+<div id="map-tab-panel" style="display:none;">
+  <div class="map-calib-panel">
     <div class="calib-bldg-list" id="calib-bldg-list">
-      <h3>Click a building, then click its location on the map</h3>
+      <h3>Building list — click to locate on map</h3>
       <!-- items injected by JS -->
     </div>
     <div class="calib-map-wrap" id="calib-map-wrap">
-      <img src="campus-map.png" alt="Campus map — calibration" id="campus-map-img-calib" />
+      <img src="campus-map.png" alt="Campus map" id="campus-map-img-calib" />
       <!-- calib markers injected by JS -->
     </div>
   </div>
-
-  <div class="calib-footer" id="calib-footer" style="display:none;">
+  <div class="calib-footer" id="calib-footer">
     <span>Coords:</span>
     <span id="calib-coords-out">— select a building above, then click its spot on the map</span>
     <button class="copy-btn" onclick="copyCoords()">Copy all</button>
@@ -969,10 +949,10 @@ const SCHEDULE = {
 const normalMarkers = {};   // bldgId → DOM el in normal map
 const calibMarkers  = {};   // bldgId → DOM el in calib map
 
-function buildMarker(id, b, container, clickFn) {
+function buildMarker(id, b, container, clickFn, label) {
   const el = document.createElement('div');
   el.className = 'map-marker';
-  el.textContent = b.num;
+  el.textContent = label != null ? label : b.num;
   el.style.left = b.left + '%';
   el.style.top  = b.top  + '%';
   el.title = b.name + (b.grid ? ' · ' + b.grid : '');
@@ -988,12 +968,11 @@ for (const [id, b] of Object.entries(B)) {
   normalMarkers[id] = buildMarker(id, b, normalWrap, (bid) => {
     if (normalMarkers[bid].classList.contains('active')) clearHighlight();
     else setHighlight(bid);
-  });
-  calibMarkers[id] = buildMarker(id, b, calibWrap, null);
+  }, b.num);
+  calibMarkers[id] = buildMarker(id, b, calibWrap, null, b.grid || b.num);
 }
 
-// ── CALIBRATION MODE ───────────────────────────────────────────────────────
-let calibOn  = false;
+// ── CALIBRATION / MAP TAB ─────────────────────────────────────────────────
 let calibSel = null;   // currently selected bldgId for placement
 const calibCoords = {};  // bldgId → {left, top} — updated during session
 
@@ -1005,9 +984,8 @@ function buildCalibList() {
     item.className = 'calib-item';
     item.id = 'ci-' + id;
     item.innerHTML =
-      `<span class="calib-num">${b.num}</span>` +
+      `<span class="calib-num">${b.grid || b.num}</span>` +
       `<span class="calib-name">${b.name}</span>` +
-      (b.grid ? `<span class="calib-grid">${b.grid}</span>` : '') +
       `<span class="calib-check" id="ck-${id}"></span>`;
     item.addEventListener('click', () => selectCalibBldg(id));
     list.appendChild(item);
@@ -1031,8 +1009,6 @@ function selectCalibBldg(id) {
 
 calibWrap.addEventListener('click', (e) => {
   if (!calibSel) return;
-  const rect = calibWrap.getBoundingClientRect();
-  // account for the image's actual rendered offset inside the scrolling wrap
   const img = document.getElementById('campus-map-img-calib');
   const imgRect = img.getBoundingClientRect();
   const lp = ((e.clientX - imgRect.left) / imgRect.width  * 100);
@@ -1081,18 +1057,18 @@ function copyCoords() {
   });
 }
 
-function toggleCalib() {
-  calibOn = !calibOn;
-  const btn = document.getElementById('calib-btn');
-  btn.classList.toggle('on', calibOn);
-  btn.textContent = calibOn ? '✓ Exit calibration' : '📍 Calibrate pin positions';
+function showMapTab() {
+  document.getElementById('schedule-section').style.display = 'none';
+  document.getElementById('campus-map').style.display = 'none';
+  document.getElementById('map-tab-panel').style.display = 'block';
+  if (!document.querySelector('.calib-item')) buildCalibList();
+}
 
-  document.getElementById('map-normal').classList.toggle('hidden', calibOn);
-  document.getElementById('map-calib').classList.toggle('visible', calibOn);
-  document.getElementById('calib-footer').style.display = calibOn ? 'flex' : 'none';
-
-  if (calibOn && !document.querySelector('.calib-item')) buildCalibList();
-  if (!calibOn && calibSel) {
+function hideMapTab() {
+  document.getElementById('map-tab-panel').style.display = 'none';
+  document.getElementById('schedule-section').style.display = '';
+  document.getElementById('campus-map').style.display = '';
+  if (calibSel) {
     document.getElementById('ci-' + calibSel)?.classList.remove('waiting');
     calibMarkers[calibSel]?.classList.remove('waiting-place');
     calibSel = null;
@@ -1300,10 +1276,16 @@ function renderDay(dayKey) {
 let currentDay = 'sun';
 document.querySelectorAll('.day-tab').forEach(tab => {
   tab.addEventListener('click', () => {
+    const prev = currentDay;
     document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     currentDay = tab.dataset.day;
-    renderDay(currentDay);
+    if (currentDay === 'map') {
+      showMapTab();
+    } else {
+      if (prev === 'map') hideMapTab();
+      renderDay(currentDay);
+    }
   });
 });
 
