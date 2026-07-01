@@ -401,20 +401,19 @@
     .bldg-badge {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
       background: var(--navy);
       color: var(--white);
       font-family: Arial, sans-serif;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
+      border-radius: 10px;
+      padding: 2px 7px;
+      white-space: nowrap;
       flex-shrink: 0;
-      margin-top: 1px;
+      margin-top: 2px;
       transition: background 0.15s;
     }
-    .agenda-row.active .bldg-badge { background: var(--gold); }
+    .agenda-row.active .bldg-badge { background: var(--gold); color: var(--navy); }
 
     .agenda-sub {
       font-style: italic;
@@ -485,20 +484,19 @@
     .ws-bldg {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
       background: var(--navy);
       color: var(--white);
       font-family: Arial, sans-serif;
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 700;
+      border-radius: 8px;
+      padding: 2px 6px;
+      white-space: nowrap;
       flex-shrink: 0;
-      margin-top: 2px;
+      margin-top: 3px;
       transition: background 0.15s;
     }
-    .ws-row.active .ws-bldg { background: var(--gold); }
+    .ws-row.active .ws-bldg { background: var(--gold); color: var(--navy); }
 
     .ws-text { flex: 1; min-width: 0; }
     .ws-presenter {
@@ -1110,7 +1108,7 @@ function makeWsRow(ws) {
 
   const badge = document.createElement('span');
   badge.className = 'ws-bldg';
-  badge.textContent = wb.num;
+  badge.textContent = (wb.grid ? wb.grid + ' ' : '') + wb.name;
 
   const txt = document.createElement('div');
   txt.className = 'ws-text';
@@ -1174,19 +1172,10 @@ function renderDay(dayKey) {
     if (bldg && !s.workshops) {
       const badge = document.createElement('span');
       badge.className = 'bldg-badge';
-      badge.textContent = bldg.num;
-      badge.title = bldg.name;
+      badge.textContent = (bldg.grid ? bldg.grid + ' ' : '') + bldg.name;
       hd.appendChild(badge);
     }
     body.appendChild(hd);
-
-    // location (non-daily, non-plenary, no workshops)
-    if (bldg && !s.daily && !s.plenary && !s.workshops) {
-      const loc = document.createElement('div');
-      loc.className = 'agenda-loc';
-      loc.textContent = bldg.name;
-      body.appendChild(loc);
-    }
 
     // plenary speaker + talk
     if (s.plenary || s.award) {
