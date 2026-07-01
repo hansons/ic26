@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IC26 — Emergence: Personal to Planetary</title>
+  <!-- no external map dependency — image-based campus map -->
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -12,222 +13,545 @@
       --blue:   #2c4a8a;
       --sky:    #4a7ab5;
       --gold:   #c9a84c;
+      --gold-lt:#fdf8ee;
       --light:  #f0f4fb;
       --white:  #ffffff;
       --text:   #1e2d3d;
       --muted:  #5a6a7e;
       --border: #d0dae8;
+      --nav-h:  44px;
+      --day-h:  46px;
+      --above:  calc(var(--nav-h) + var(--day-h));
     }
 
     body {
       font-family: Georgia, 'Times New Roman', serif;
       background: var(--light);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.55;
+      overflow-x: hidden;
     }
 
     /* ── HERO ── */
     .hero {
       background: linear-gradient(160deg, var(--navy) 0%, var(--blue) 60%, var(--sky) 100%);
       color: var(--white);
+      padding: 2rem 1.5rem 1.75rem;
       text-align: center;
-      padding: 3.5rem 1.5rem 3rem;
     }
     .hero-eyebrow {
       font-family: Arial, sans-serif;
-      font-size: 0.8rem;
+      font-size: 0.72rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.65);
-      margin-bottom: 0.75rem;
-    }
-    .hero h1 {
-      font-size: clamp(1.75rem, 5vw, 3rem);
-      font-weight: normal;
-      line-height: 1.2;
+      color: rgba(255,255,255,0.55);
       margin-bottom: 0.4rem;
     }
+    .hero h1 {
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      font-weight: normal;
+      line-height: 1.15;
+      margin-bottom: 0.2rem;
+    }
     .hero-theme {
-      font-size: clamp(1rem, 3vw, 1.4rem);
+      font-size: clamp(0.9rem, 2.5vw, 1.2rem);
       color: var(--gold);
       font-style: italic;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
     .hero-meta {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 1rem 2.5rem;
+      gap: 0.5rem 2rem;
       font-family: Arial, sans-serif;
-      font-size: 0.9rem;
-      color: rgba(255,255,255,0.85);
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.8);
     }
-    .hero-meta span { display: flex; align-items: center; gap: 0.4rem; }
 
-    /* ── NAV PILLS ── */
+    /* ── QUICK NAV ── */
     .quick-nav {
       background: var(--navy);
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 0.25rem;
-      padding: 0.6rem 1rem;
+      padding: 0 0.75rem;
+      height: var(--nav-h);
+      align-items: center;
       position: sticky;
       top: 0;
-      z-index: 100;
+      z-index: 200;
     }
     .quick-nav a {
       font-family: Arial, sans-serif;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.75);
+      color: rgba(255,255,255,0.7);
       text-decoration: none;
-      padding: 0.3rem 0.8rem;
+      padding: 0.3rem 0.75rem;
       border-radius: 2rem;
       transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
     }
     .quick-nav a:hover { background: rgba(255,255,255,0.12); color: #fff; }
 
-    /* ── LAYOUT ── */
+    /* ── DAY TABS ── */
+    .day-nav {
+      background: var(--white);
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      position: sticky;
+      top: var(--nav-h);
+      z-index: 190;
+      height: var(--day-h);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .day-tab {
+      font-family: Arial, sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      padding: 0 1.25rem;
+      height: 100%;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.15s;
+    }
+    .day-tab:hover { color: var(--navy); }
+    .day-tab.active { color: var(--navy); border-bottom-color: var(--gold); }
+
+    /* ── FULL-WIDTH SCHEDULE ── */
+    .schedule-section {
+      background: var(--white);
+      border-bottom: 2px solid var(--border);
+    }
+    .events-col {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0;
+      background: var(--white);
+    }
+
+    /* ── CAMPUS MAP SECTION ── */
+    .campus-map-section {
+      background: #2a2a2a;
+      padding: 0;
+    }
+    .campus-map-hdr {
+      background: var(--navy);
+      padding: 0.6rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .campus-map-hdr h2 {
+      font-family: Arial, sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.8);
+      border: none;
+      padding: 0;
+      margin: 0;
+      display: inline;
+    }
+    .calib-btn {
+      font-family: Arial, sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.8);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 3px;
+      padding: 0.3rem 0.75rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .calib-btn.on { background: var(--gold); color: var(--navy); border-color: #a07820; }
+
+    /* Normal map view */
+    .map-normal {
+      position: relative;
+    }
+    .map-normal img {
+      width: 100%;
+      display: block;
+    }
+
+    /* Calibration view */
+    .map-calib {
+      display: none;
+      flex-direction: row;
+      height: 75vh;
+      min-height: 480px;
+    }
+    .map-calib.visible { display: flex; }
+    .map-normal.hidden { display: none; }
+
+    .calib-bldg-list {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--navy);
+      overflow-y: auto;
+      padding: 0.5rem 0;
+    }
+    .calib-bldg-list h3 {
+      font-family: Arial, sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.4);
+      padding: 0.4rem 0.85rem 0.6rem;
+    }
+    .calib-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.85rem;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: background 0.1s;
+    }
+    .calib-item:hover { background: rgba(255,255,255,0.06); }
+    .calib-item.waiting {
+      background: rgba(201,168,76,0.15);
+      border-left-color: var(--gold);
+    }
+    .calib-item.placed { opacity: 0.6; }
+    .calib-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      color: var(--white);
+      font-family: Arial, sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .calib-item.waiting .calib-num { background: var(--gold); color: var(--navy); }
+    .calib-name {
+      font-family: Arial, sans-serif;
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.85);
+      flex: 1;
+    }
+    .calib-check {
+      font-size: 0.7rem;
+      color: #5cb88a;
+    }
+
+    .calib-map-wrap {
+      flex: 1;
+      position: relative;
+      overflow: auto;
+      cursor: crosshair;
+    }
+    .calib-map-wrap img {
+      width: 100%;
+      display: block;
+      min-width: 600px;
+    }
+
+    .calib-footer {
+      background: #1a1a1a;
+      padding: 0.5rem 1rem;
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--gold);
+      min-height: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .calib-footer span { color: rgba(255,255,255,0.5); }
+    #calib-coords-out { flex: 1; }
+    .copy-btn {
+      font-family: Arial, sans-serif;
+      font-size: 0.7rem;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 3px;
+      padding: 0.15rem 0.5rem;
+      cursor: pointer;
+    }
+
+    /* Map markers (shared between normal + calib views) */
+    .map-marker {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      border: 2px solid var(--navy);
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--navy);
+      box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
+      pointer-events: all;
+      user-select: none;
+    }
+    .map-marker:hover { transform: translate(-50%, -50%) scale(1.15); }
+    .map-marker.active {
+      background: var(--gold);
+      border-color: #8a6010;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(201,168,76,0.7);
+      z-index: 10;
+    }
+    .map-marker.waiting-place {
+      background: var(--gold);
+      border-color: #8a6010;
+      color: #fff;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50%       { transform: translate(-50%, -50%) scale(1.3); }
+    }
+
+    /* ── SCHEDULE / AGENDA ── */
+    .events-col { padding: 0; }
+
+    .day-header {
+      font-family: Arial, sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--white);
+      background: var(--navy);
+      padding: 0.45rem 0.75rem;
+    }
+
+    .agenda-row {
+      display: grid;
+      grid-template-columns: 62px 1fr;
+      border-left: 3px solid transparent;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.1s, border-color 0.1s;
+      background: var(--white);
+    }
+    .agenda-row:last-child { border-bottom: none; }
+    .agenda-row:hover { background: #f4f7ff; }
+    .agenda-row.active {
+      border-left-color: var(--gold);
+      background: var(--gold-lt);
+    }
+    .agenda-row.daily { background: #fafbfc; }
+    .agenda-row.daily:hover { background: #f0f4fb; }
+
+    .agenda-time {
+      padding: 0.6rem 0.4rem 0.6rem 0.65rem;
+      font-family: Arial, sans-serif;
+      font-size: 0.67rem;
+      font-weight: 700;
+      color: var(--muted);
+      line-height: 1.35;
+      border-right: 1px solid var(--border);
+      text-align: right;
+      word-break: break-word;
+    }
+    .agenda-row.active .agenda-time { color: var(--navy); }
+
+    .agenda-body {
+      padding: 0.55rem 0.65rem 0.55rem 0.55rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.12rem;
+      min-width: 0;
+    }
+
+    .agenda-hd {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+    .agenda-title {
+      font-size: 0.875rem;
+      font-weight: bold;
+      color: var(--text);
+      line-height: 1.3;
+      flex: 1;
+    }
+    .agenda-title.is-plenary { color: var(--blue); }
+    .agenda-title.is-daily   { font-weight: normal; color: var(--muted); }
+    .agenda-title.is-special { color: #7a3800; }
+
+    .bldg-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--white);
+      font-family: Arial, sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: background 0.15s;
+    }
+    .agenda-row.active .bldg-badge { background: var(--gold); }
+
+    .agenda-sub {
+      font-style: italic;
+      font-size: 0.8rem;
+      color: var(--blue);
+    }
+    .agenda-talk {
+      font-style: italic;
+      font-size: 0.8rem;
+      color: var(--sky);
+    }
+    .agenda-loc {
+      font-family: Arial, sans-serif;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .agenda-note {
+      font-family: Arial, sans-serif;
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* ── WORKSHOP ROWS ── */
+    .ws-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 0.15rem;
+    }
+    .ws-count {
+      font-family: Arial, sans-serif;
+      font-size: 0.7rem;
+      color: var(--sky);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .ws-chevron {
+      font-size: 0.65rem;
+      color: var(--muted);
+      transition: transform 0.2s;
+    }
+    .agenda-row.expanded .ws-chevron { transform: rotate(180deg); }
+
+    .ws-list {
+      margin-top: 0.35rem;
+      border-top: 1px solid var(--border);
+      padding-top: 0.2rem;
+      display: none;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+    .agenda-row.expanded .ws-list { display: flex; }
+
+    .ws-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.4rem;
+      padding: 0.28rem 0.3rem;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .ws-row:hover { background: rgba(44,74,138,0.07); }
+    .ws-row.active { background: rgba(201,168,76,0.18); }
+
+    .ws-bldg {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--navy);
+      color: var(--white);
+      font-family: Arial, sans-serif;
+      font-size: 9px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: background 0.15s;
+    }
+    .ws-row.active .ws-bldg { background: var(--gold); }
+
+    .ws-text { flex: 1; min-width: 0; }
+    .ws-presenter {
+      font-family: Arial, sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--navy);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ws-title-text {
+      font-size: 0.76rem;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+
+    /* ── BELOW-MAP SECTIONS (logistics) ── */
     .container {
       max-width: 860px;
       margin: 0 auto;
       padding: 0 1.25rem;
     }
-
-    section { padding: 2.5rem 0; border-bottom: 1px solid var(--border); }
-    section:last-of-type { border-bottom: none; }
-
+    section.logistics {
+      padding: 2.25rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    section.logistics:last-of-type { border-bottom: none; }
     h2 {
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       font-weight: normal;
       color: var(--navy);
       margin-bottom: 1.25rem;
-      padding-bottom: 0.5rem;
+      padding-bottom: 0.4rem;
       border-bottom: 2px solid var(--gold);
       display: inline-block;
     }
-
-    /* ── SCHEDULE ── */
-    .schedule-day {
-      margin-bottom: 2rem;
-    }
-    .day-header {
-      background: var(--navy);
-      color: var(--white);
-      font-family: Arial, sans-serif;
-      font-size: 0.85rem;
-      font-weight: bold;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0.5rem 1rem;
-      border-radius: 4px 4px 0 0;
-    }
-    .day-sessions {
-      border: 1px solid var(--border);
-      border-top: none;
-      border-radius: 0 0 4px 4px;
-      overflow: hidden;
-    }
-    .session {
-      display: grid;
-      grid-template-columns: 7rem 1fr;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.92rem;
-    }
-    .session:last-child { border-bottom: none; }
-    .session-time {
-      background: var(--light);
-      padding: 0.65rem 0.8rem;
-      font-family: Arial, sans-serif;
-      font-size: 0.8rem;
-      color: var(--muted);
-      border-right: 1px solid var(--border);
-      display: flex;
-      align-items: flex-start;
-      padding-top: 0.7rem;
-    }
-    .session-body {
-      padding: 0.65rem 1rem;
-    }
-    .session-title {
-      font-weight: bold;
-      color: var(--text);
-    }
-    .session-note {
-      font-size: 0.82rem;
-      color: var(--muted);
-      font-family: Arial, sans-serif;
-      margin-top: 0.2rem;
-    }
-    .session.highlight .session-body { background: #fdf8ee; }
-    .session.highlight .session-title { color: var(--blue); }
-    .session.tbd .session-title { color: var(--muted); font-style: italic; }
-
-    /* ── PRE-CONF BANNER ── */
-    .preconf-banner {
-      background: linear-gradient(135deg, #e8f0fb, #d4e4f7);
-      border: 1px solid var(--sky);
-      border-radius: 6px;
-      padding: 1.1rem 1.25rem;
-      margin-bottom: 1.75rem;
-      display: flex;
-      gap: 1rem;
-      align-items: flex-start;
-    }
-    .preconf-banner .icon { font-size: 1.5rem; flex-shrink: 0; }
-    .preconf-banner strong { display: block; color: var(--navy); margin-bottom: 0.2rem; }
-    .preconf-banner p { font-size: 0.88rem; font-family: Arial, sans-serif; color: var(--muted); }
-
-    /* ── MAP ── */
-    .map-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: 0.75rem;
-    }
-    .map-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-family: Arial, sans-serif;
-      font-size: 0.85rem;
-      padding: 0.5rem 1.1rem;
-      border-radius: 4px;
-      text-decoration: none;
-      font-weight: bold;
-      transition: opacity 0.15s;
-    }
-    .map-btn:hover { opacity: 0.85; }
-    .map-btn.primary { background: var(--blue); color: #fff; }
-    .map-btn.secondary { background: #fff; color: var(--blue); border: 1px solid var(--blue); }
-
-    .building-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 0.75rem;
-      margin-top: 1rem;
-    }
-    .building-card {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 0.75rem 1rem;
-      font-family: Arial, sans-serif;
-      font-size: 0.85rem;
-    }
-    .building-card strong { color: var(--navy); display: block; margin-bottom: 0.15rem; }
-    .building-card span { color: var(--muted); font-size: 0.8rem; }
-
-    /* ── LOGISTICS ── */
     .logistics-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 1rem;
     }
     .logistics-card {
-      background: #fff;
+      background: var(--white);
       border: 1px solid var(--border);
       border-radius: 6px;
       padding: 1rem 1.1rem;
@@ -241,24 +565,9 @@
       font-weight: bold;
       margin-bottom: 0.4rem;
     }
-    .logistics-card p {
-      font-size: 0.88rem;
-      color: var(--text);
-    }
+    .logistics-card p { font-size: 0.88rem; }
     .logistics-card a { color: var(--blue); }
 
-    /* ── GALA ── */
-    .gala-block {
-      background: linear-gradient(135deg, #1a2744, #2c4a8a);
-      color: #fff;
-      border-radius: 8px;
-      padding: 1.5rem 1.5rem;
-      margin-top: 0.5rem;
-    }
-    .gala-block h3 { font-weight: normal; font-size: 1.2rem; margin-bottom: 0.3rem; color: var(--gold); }
-    .gala-block p { font-size: 0.9rem; color: rgba(255,255,255,0.85); font-family: Arial, sans-serif; line-height: 1.5; }
-
-    /* ── REGISTRATION STATUS ── */
     .reg-status {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -277,10 +586,20 @@
     .reg-card.closed { background: #fef2f2; border-color: #e8a0a0; color: #7c2020; }
     .reg-card.soldout { background: #fdf4e7; border-color: #d4a84b; color: #6b4400; }
 
-    /* ── CONTACT ── */
+    .map-links { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.75rem; }
+    .map-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      font-family: Arial, sans-serif; font-size: 0.85rem;
+      padding: 0.5rem 1.1rem; border-radius: 4px;
+      text-decoration: none; font-weight: bold;
+      transition: opacity 0.15s;
+    }
+    .map-btn:hover { opacity: 0.85; }
+    .map-btn.primary { background: var(--blue); color: #fff; }
+    .map-btn.secondary { background: #fff; color: var(--blue); border: 1px solid var(--blue); }
+
     .contact-row {
-      display: flex;
-      flex-wrap: wrap;
+      display: flex; flex-wrap: wrap;
       gap: 0.5rem 2rem;
       font-family: Arial, sans-serif;
       font-size: 0.88rem;
@@ -289,7 +608,6 @@
     }
     .contact-row a { color: var(--blue); }
 
-    /* ── FOOTER ── */
     footer {
       background: var(--navy);
       color: rgba(255,255,255,0.55);
@@ -300,14 +618,16 @@
     }
     footer a { color: rgba(255,255,255,0.75); }
 
-    @media (max-width: 540px) {
-      .session { grid-template-columns: 6rem 1fr; }
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      .map-calib { flex-direction: column; height: auto; }
+      .calib-bldg-list { width: 100%; height: 180px; }
     }
   </style>
 </head>
 <body>
 
-<!-- ── HERO ── -->
+<!-- HERO -->
 <div class="hero">
   <p class="hero-eyebrow">The Urantia Book Fellowship · International Conference</p>
   <h1>IC26</h1>
@@ -319,190 +639,73 @@
   </div>
 </div>
 
-<!-- ── QUICK NAV ── -->
+<!-- QUICK NAV -->
 <nav class="quick-nav">
   <a href="#schedule">Schedule</a>
-  <a href="#map">Campus Map</a>
+  <a href="#campus-map">Campus Map</a>
   <a href="#arrival">Arrival</a>
-  <a href="#gala">Gala</a>
   <a href="#registration">Registration</a>
   <a href="#transportation">Getting Here</a>
   <a href="#contact">Contact</a>
 </nav>
 
+<!-- DAY TABS -->
+<div class="day-nav" id="schedule">
+  <button class="day-tab active" data-day="sun">Sun Jul 12</button>
+  <button class="day-tab" data-day="mon">Mon Jul 13</button>
+  <button class="day-tab" data-day="tue">Tue Jul 14</button>
+  <button class="day-tab" data-day="wed">Wed Jul 15</button>
+  <button class="day-tab" data-day="thu">Thu Jul 16</button>
+</div>
+
+<!-- FULL-WIDTH SCHEDULE -->
+<div class="schedule-section">
+  <div class="events-col" id="events-panel"></div>
+</div>
+
+<!-- CAMPUS MAP (below schedule) -->
+<div class="campus-map-section" id="campus-map">
+  <div class="campus-map-hdr">
+    <h2>Campus Map · Asilomar Conference Grounds</h2>
+    <button class="calib-btn" id="calib-btn" onclick="toggleCalib()">📍 Calibrate pin positions</button>
+  </div>
+
+  <!-- Normal map view -->
+  <div class="map-normal" id="map-normal">
+    <div style="position:relative;" id="map-normal-wrap">
+      <img src="campus-map.png" alt="Asilomar Conference Grounds" id="campus-map-img-normal" />
+      <!-- normal markers injected by JS -->
+    </div>
+  </div>
+
+  <!-- Calibration view -->
+  <div class="map-calib" id="map-calib">
+    <div class="calib-bldg-list" id="calib-bldg-list">
+      <h3>Click a building, then click its location on the map</h3>
+      <!-- items injected by JS -->
+    </div>
+    <div class="calib-map-wrap" id="calib-map-wrap">
+      <img src="campus-map.png" alt="Campus map — calibration" id="campus-map-img-calib" />
+      <!-- calib markers injected by JS -->
+    </div>
+  </div>
+
+  <div class="calib-footer" id="calib-footer" style="display:none;">
+    <span>Coords:</span>
+    <span id="calib-coords-out">— select a building above, then click its spot on the map</span>
+    <button class="copy-btn" onclick="copyCoords()">Copy all</button>
+  </div>
+</div>
+
+<!-- LOGISTICS SECTIONS -->
 <div class="container">
 
-  <!-- ── SCHEDULE ── -->
-  <section id="schedule">
-    <h2>Program Schedule</h2>
-
-    <!-- Pre-conference -->
-    <div class="preconf-banner">
-      <div class="icon">&#128187;</div>
-      <div>
-        <strong>Pre-Conference Zoom — Meet &amp; Greet</strong>
-        <p>Tuesday, July 7 &nbsp;·&nbsp; 5:00 PM PT &nbsp;/&nbsp; 6:00 PM MT &nbsp;/&nbsp; 7:00 PM CT &nbsp;/&nbsp; 8:00 PM ET<br>
-        Hosted by Trudi and Aprilhelen — a warm welcome before you arrive.</p>
-      </div>
-    </div>
-
-    <!-- Sunday July 12 -->
-    <div class="schedule-day">
-      <div class="day-header">Sunday, July 12 — Arrival Day</div>
-      <div class="day-sessions">
-        <div class="session highlight">
-          <div class="session-time">1:30–5:00 PM</div>
-          <div class="session-body">
-            <div class="session-title">Conference Check-In</div>
-            <div class="session-note">Marlin Room · Luggage storage available · Canvas bags &amp; thermoses distributed</div>
-          </div>
-        </div>
-        <div class="session tbd">
-          <div class="session-time">Evening</div>
-          <div class="session-body">
-            <div class="session-title">Opening Session — TBA</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Monday July 13 -->
-    <div class="schedule-day">
-      <div class="day-header">Monday, July 13</div>
-      <div class="day-sessions">
-        <div class="session tbd">
-          <div class="session-time">Morning</div>
-          <div class="session-body"><div class="session-title">Sessions — TBA</div></div>
-        </div>
-        <div class="session tbd">
-          <div class="session-time">Afternoon</div>
-          <div class="session-body"><div class="session-title">Sessions — TBA</div></div>
-        </div>
-        <div class="session tbd">
-          <div class="session-time">Evening</div>
-          <div class="session-body"><div class="session-title">Evening Program — TBA</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tuesday July 14 -->
-    <div class="schedule-day">
-      <div class="day-header">Tuesday, July 14</div>
-      <div class="day-sessions">
-        <div class="session tbd">
-          <div class="session-time">Morning</div>
-          <div class="session-body"><div class="session-title">Sessions — TBA</div></div>
-        </div>
-        <div class="session highlight">
-          <div class="session-time">Afternoon</div>
-          <div class="session-body">
-            <div class="session-title">Secondary Works Panel</div>
-            <div class="session-note">Followed by Secondary Works Networking</div>
-          </div>
-        </div>
-        <div class="session tbd">
-          <div class="session-time">Evening</div>
-          <div class="session-body"><div class="session-title">Evening Program — TBA</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Wednesday July 15 -->
-    <div class="schedule-day">
-      <div class="day-header">Wednesday, July 15</div>
-      <div class="day-sessions">
-        <div class="session tbd">
-          <div class="session-time">Morning</div>
-          <div class="session-body"><div class="session-title">Sessions — TBA</div></div>
-        </div>
-        <div class="session tbd">
-          <div class="session-time">Afternoon</div>
-          <div class="session-body"><div class="session-title">Sessions — TBA</div></div>
-        </div>
-        <div class="session highlight">
-          <div class="session-time">Evening</div>
-          <div class="session-body">
-            <div class="session-title">1920s Gala &#x2728;</div>
-            <div class="session-note">Light and Life Band · Music until 11:00 PM · All ages welcome</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Thursday July 16 -->
-    <div class="schedule-day">
-      <div class="day-header">Thursday, July 16 — Closing Day</div>
-      <div class="day-sessions">
-        <div class="session tbd">
-          <div class="session-time">Morning</div>
-          <div class="session-body"><div class="session-title">Closing Sessions — TBA</div></div>
-        </div>
-        <div class="session tbd">
-          <div class="session-time">Afternoon</div>
-          <div class="session-body"><div class="session-title">Closing Ceremony — TBA</div></div>
-        </div>
-      </div>
-    </div>
-
-    <p style="font-family:Arial,sans-serif;font-size:0.8rem;color:var(--muted);margin-top:0.75rem;">
-      &#9432; Full session details and speaker names will be added as the program is finalized.
-    </p>
-  </section>
-
-  <!-- ── CAMPUS MAP ── -->
-  <section id="map">
-    <h2>Campus Map</h2>
-    <p style="font-family:Arial,sans-serif;font-size:0.9rem;color:var(--muted);margin-bottom:1rem;">
-      Asilomar Conference Grounds occupies a forested coastal property in Pacific Grove.
-      Download the property map or get directions before you arrive.
-    </p>
-    <div class="map-links">
-      <a class="map-btn primary"
-         href="https://assets.milestoneinternet.com/aramark-parent/asilomar-hotel-and-conference-grounds/pdf/asilomar-grounds-map-20210611.pdf"
-         target="_blank">&#128196; Download Campus Map (PDF)</a>
-      <a class="map-btn secondary"
-         href="https://maps.app.goo.gl/3LigutgWshEg978p8"
-         target="_blank">&#128205; Open in Google Maps</a>
-      <a class="map-btn secondary"
-         href="https://www.visitasilomar.com"
-         target="_blank">&#127968; Visit Asilomar Website</a>
-    </div>
-
-    <div class="building-grid">
-      <div class="building-card">
-        <strong>Marlin Room</strong>
-        <span>Conference check-in · Sunday 1:30–5 PM</span>
-      </div>
-      <div class="building-card">
-        <strong>Merrill Hall</strong>
-        <span>Main plenary venue · No service animals</span>
-      </div>
-      <div class="building-card">
-        <strong>Crocker Dining Hall</strong>
-        <span>Meals included with hotel registration</span>
-      </div>
-      <div class="building-card">
-        <strong>Secondary Works Gallery</strong>
-        <span>Books, art, music, courses · Sun–Thu</span>
-      </div>
-      <div class="building-card">
-        <strong>Asilomar State Beach</strong>
-        <span>Walking distance · Beach trail access</span>
-      </div>
-      <div class="building-card">
-        <strong>Phoebe's Cafe</strong>
-        <span>On-property casual dining</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── ARRIVAL ── -->
-  <section id="arrival">
+  <section class="logistics" id="arrival">
     <h2>Before You Arrive</h2>
     <div class="logistics-grid">
       <div class="logistics-card">
         <div class="card-label">Check-In</div>
-        <p>Sunday, July 12<br>1:30–5:00 PM<br>Marlin Room<br><br>Luggage storage available if your room isn't ready.</p>
+        <p>Sunday, July 12<br>1:30–5:00 PM<br>Marlin Room (Building 2)<br><br>Luggage storage available if your room isn't ready.</p>
       </div>
       <div class="logistics-card">
         <div class="card-label">What's Waiting for You</div>
@@ -510,7 +713,7 @@
       </div>
       <div class="logistics-card">
         <div class="card-label">Accessibility</div>
-        <p>Service animals must be registered in advance.<br>Contact: <a href="mailto:geoffrey.theiss@urantiabook.org">geoffrey.theiss@<br>urantiabook.org</a><br><br>Service animals are NOT permitted in Merrill Hall.</p>
+        <p>Service animals must be registered in advance.<br>Contact: <a href="mailto:geoffrey.theiss@urantiabook.org">geoffrey.theiss@urantiabook.org</a><br><br>Service animals are NOT permitted in Merrill Hall.</p>
       </div>
       <div class="logistics-card">
         <div class="card-label">Attire</div>
@@ -527,71 +730,36 @@
     </div>
   </section>
 
-  <!-- ── GALA ── -->
-  <section id="gala">
-    <h2>Wednesday Night Gala</h2>
-    <div class="gala-block">
-      <h3>The 1920s Gala &#x2728;</h3>
-      <p>
-        Wednesday evening, July 15 &nbsp;·&nbsp; Music until 11:00 PM<br><br>
-        An evening of celebration with live music by the <strong>Light and Life Band</strong>.
-        All ages are welcome. 1920s-inspired attire is encouraged — butterfly-themed touches celebrated.
-      </p>
-    </div>
-  </section>
-
-  <!-- ── REGISTRATION ── -->
-  <section id="registration">
+  <section class="logistics" id="registration">
     <h2>Registration</h2>
     <div class="reg-status">
-      <div class="reg-card soldout">
-        <strong>Pre-Conference Retreat</strong>
-        Sold Out
-      </div>
-      <div class="reg-card closed">
-        <strong>Hotel (Single)</strong>
-        Closed
-      </div>
-      <div class="reg-card closed">
-        <strong>Hotel (Triple)</strong>
-        Closed
-      </div>
-      <div class="reg-card closed">
-        <strong>Hotel (Quad+)</strong>
-        Closed
-      </div>
-      <div class="reg-card open">
-        <strong>Commuter</strong>
-        Still Available &#10003;
-      </div>
+      <div class="reg-card soldout"><strong>Pre-Conference Retreat</strong>Sold Out</div>
+      <div class="reg-card closed"><strong>Hotel (Single)</strong>Closed</div>
+      <div class="reg-card closed"><strong>Hotel (Triple)</strong>Closed</div>
+      <div class="reg-card closed"><strong>Hotel (Quad+)</strong>Closed</div>
+      <div class="reg-card open"><strong>Commuter</strong>Still Available &#10003;</div>
     </div>
-
     <p style="font-family:Arial,sans-serif;font-size:0.85rem;color:var(--muted);margin-top:1rem;">
-      Commuter registration is available for day attendees who are arranging their own lodging.
+      Commuter registration is available for day attendees arranging their own lodging.
       Visit the <a href="https://members.urantiabook.org/ic26/register" style="color:var(--blue);">IC26 registration page</a> for details.
     </p>
-
     <div style="margin-top:1.25rem;padding:1rem;background:#f0f7ff;border-radius:5px;border:1px solid #b8d4f0;font-family:Arial,sans-serif;font-size:0.85rem;">
       <strong style="color:var(--navy);">Youth Scholarship Available</strong><br>
       Ages 18–35 with experience in the Urantia Book community can apply for the
-      <a href="https://members.urantiabook.org/Scholarship" style="color:var(--blue);">David Kulieke Youth Scholarship Fund</a>
-      to support conference attendance. Applications accepted year-round.
+      <a href="https://members.urantiabook.org/Scholarship" style="color:var(--blue);">David Kulieke Youth Scholarship Fund</a>.
     </div>
   </section>
 
-  <!-- ── TRANSPORTATION ── -->
-  <section id="transportation">
+  <section class="logistics" id="transportation">
     <h2>Getting Here</h2>
     <div class="logistics-grid">
       <div class="logistics-card">
         <div class="card-label">Nearest Airport</div>
-        <p>Monterey Regional Airport (MRY) is closest.<br><br>
-        San Jose (SJC) and San Francisco (SFO) are also served by shuttle.</p>
+        <p>Monterey Regional (MRY) is closest.<br><br>San Jose (SJC) and San Francisco (SFO) also served by shuttle.</p>
       </div>
       <div class="logistics-card">
         <div class="card-label">Shuttle Service</div>
-        <p><strong>Groome Transport</strong> operates scheduled shuttles from San Jose and San Francisco airports to Pacific Grove.<br><br>
-        Book directly at the Groome Transport website.</p>
+        <p><strong>Groome Transport</strong> runs scheduled shuttles from SJC and SFO to Pacific Grove. Book directly at the Groome Transport website.</p>
       </div>
       <div class="logistics-card">
         <div class="card-label">Ride-Share Coordination</div>
@@ -602,15 +770,17 @@
         <p>Free parking on property. No state park entrance fee required for conference attendees.</p>
       </div>
     </div>
-
-    <div style="margin-top:1.25rem;padding:1rem 1.1rem;background:#fff;border:1px solid var(--border);border-radius:5px;font-family:Arial,sans-serif;font-size:0.85rem;">
+    <div style="margin-top:1.25rem;padding:1rem 1.1rem;background:var(--white);border:1px solid var(--border);border-radius:5px;font-family:Arial,sans-serif;font-size:0.85rem;">
       <strong style="color:var(--navy);">Asilomar Address</strong><br>
       800 Asilomar Avenue, Pacific Grove, CA 93950
     </div>
+    <div class="map-links" style="margin-top:1rem;">
+      <a class="map-btn primary" href="https://assets.milestoneinternet.com/aramark-parent/asilomar-hotel-and-conference-grounds/pdf/asilomar-grounds-map-20210611.pdf" target="_blank">&#128196; Download Campus Map (PDF)</a>
+      <a class="map-btn secondary" href="https://maps.app.goo.gl/3LigutgWshEg978p8" target="_blank">&#128205; Open in Google Maps</a>
+    </div>
   </section>
 
-  <!-- ── CONTACT ── -->
-  <section id="contact">
+  <section class="logistics" id="contact">
     <h2>Contact &amp; Questions</h2>
     <div class="contact-row">
       <span><strong>Conference Coordination:</strong> <a href="mailto:aprilhelen@urantiabook.org">aprilhelen@urantiabook.org</a></span>
@@ -631,5 +801,498 @@
   <a href="https://members.urantiabook.org/ic26/">members.urantiabook.org/ic26</a>
 </footer>
 
+<script>
+// ── BUILDINGS — left/top as % of campus-map.png (2484×1620px) ─────────────
+// Use "📍 Calibrate pins" button above the map to fine-tune positions:
+// toggle it on, click the correct spot on the map, read the coords shown,
+// then update left/top here and reload.
+const B = {
+  merrill:    { num: 1,  name: 'Merrill Hall',       left: 28.5, top: 37.3, desc: 'Main plenary venue · Evening events · Gallery / Store · Kids drop-off & pick-up' },
+  marlin:     { num: 2,  name: 'Marlin Room',         left: 17.0, top: 37.5, desc: 'Conference check-in · Workshops' },
+  crocker:    { num: 3,  name: 'Crocker Dining Hall', left: 27.9, top: 45.6, desc: 'All meals — Breakfast 7:30 AM · Lunch 12 PM · Dinner 6 PM · Meal card required' },
+  hearst:     { num: 4,  name: 'Hearst Social Hall',  left: 24.5, top: 38.3, desc: 'Hotel check-in · Quiet lounge · Group photo (Thu AM back steps)' },
+  toyon:      { num: 5,  name: 'Toyon',               left:  9.8, top: 29.9, desc: 'Workshop room' },
+  acacia:     { num: 6,  name: 'Acacia',              left: 10.4, top: 30.9, desc: 'Workshop room' },
+  heather:    { num: 7,  name: 'Heather',             left: 11.4, top: 31.8, desc: 'Workshop room' },
+  scripps:    { num: 8,  name: 'Scripps',             left: 15.4, top: 34.0, desc: 'Workshop room' },
+  curlew:     { num: 9,  name: 'Curlew',              left: 14.5, top: 36.7, desc: 'Workshop room' },
+  dolphin:    { num: 10, name: 'Dolphin',             left:  9.8, top: 40.2, desc: 'Workshop room' },
+  nautilus:   { num: 11, name: 'Nautilus / Triton',   left: 39.8, top: 36.7, desc: 'Kids & Teens program (Mon–Wed 9 AM – 12 PM and 2–4:45 PM)' },
+  sanderling: { num: 12, name: 'Sanderling',          left:  9.8, top: 46.7, desc: 'Meditation · Quiet all day · Group sessions 7:10 AM and 5:30 PM' },
+  bonfire:    { num: 13, name: 'Bonfire Pit',         left: 23.3, top: 53.6, desc: 'Outdoor area · BBQ area near Grand Cypress Meadow' },
+};
+
+// ── SCHEDULE ───────────────────────────────────────────────────────────────
+const SCHEDULE = {
+  sun: [
+    { time: '1:30–5:00 PM', title: 'Conference Check-In', bldg: 'marlin', note: 'Canvas bags & thermoses distributed · Volunteer check-in · Hospitality hosted by Golden Gate Circle Society' },
+    { time: '5:00–6:00 PM', title: 'Meet & Greet', bldg: 'merrill', note: 'Hosted by Urantia Book Fellowship General Council' },
+    { time: '6:00–10:00 PM', title: 'Gallery / Store Opens', bldg: 'merrill', note: 'Secondary works · Cashless QR ordering · Gallery Give-Aways' },
+    { time: '7:15–10:00 PM', title: 'Welcome Social', bldg: 'merrill', note: 'Light & Life House Band · Cash bar' },
+  ],
+  mon: [
+    { time: '7:10–7:30 AM', title: 'Morning Meditation', bldg: 'sanderling', daily: true },
+    { time: '7:30–8:30 AM', title: 'Breakfast', bldg: 'crocker', daily: true, note: 'Meal card required' },
+    { time: '8:30 AM', title: 'Formal Program Opens', bldg: 'merrill', note: 'Worship and opening remarks' },
+    { time: '9:35 AM', title: 'Morning Plenary · Merrill Hall', bldg: 'merrill', plenary: true,
+      speaker: 'Anna Zeven', origin: 'Netherlands', talk: '"Finding God (Within Yourself)"' },
+    { time: '10:15–11:45 AM', title: 'Morning Workshops', workshops: [
+      { bldg: 'toyon',    p: 'David Schlundt',               t: "I'm knitting you a soul, hand me more yarn" },
+      { bldg: 'heather',  p: 'Mark Turrin',                  t: 'Seal the Deal with the Infinite' },
+      { bldg: 'acacia',   p: 'Santiago Kneeland & Aprilhelen', t: 'Art of Living with The Divine Within' },
+      { bldg: 'scripps',  p: 'Carol Schindler',              t: 'Emerging into Presence' },
+      { bldg: 'marlin',   p: 'Michael MacIsaac & Phil Taylor', t: 'Sharing Our Spiritual Lives' },
+      { bldg: 'dolphin',  p: 'Patrick Yesh',                 t: 'Personality and Soul Identity' },
+      { bldg: 'curlew',   p: 'James Woodward',               t: 'The Agency of Personal Revelation in Service to Epochal Revelation' },
+    ]},
+    { time: '12:00–1:00 PM', title: 'Lunch', bldg: 'crocker', daily: true, note: 'Meal card required' },
+    { time: '1:00–2:00 PM', title: 'Bonus Workshop', workshops: [
+      { bldg: 'heather',  p: 'Cate Wheeler', t: 'Supporting Spirituality in Early Childhood' },
+    ]},
+    { time: '2:15 PM', title: 'Afternoon Plenary · Merrill Hall', bldg: 'merrill', plenary: true,
+      speaker: 'Felipe Arrigorriaga', origin: 'Chile', talk: '"The More I Know Myself, the More I Know God"' },
+    { time: '3:00–4:30 PM', title: 'Afternoon Workshops', workshops: [
+      { bldg: 'toyon',   p: 'Alex Crenshaw',                 t: 'Sacred Geometry: Portal to the Cosmos' },
+      { bldg: 'heather', p: 'Guy Hévey & Paula Thompson',    t: '"The Master, IN PERSON" — Viewing "Jesus of Nazareth"' },
+      { bldg: 'acacia',  p: 'Patricia McGrath',              t: 'Forgiveness' },
+      { bldg: 'scripps', p: 'Errol Strider',                 t: 'Urantia Book Showstoppers' },
+      { bldg: 'curlew',  p: 'Steve Sawyer & Brent St. Denis', t: 'Prison Outreach: There, but for the grace of God, go I' },
+      { bldg: 'dolphin', p: 'Eden Yesh',                     t: 'Cooperative Civilization: Community & Cooperative Capitalism' },
+      { bldg: 'marlin',  p: 'Sherry Cathcart Chavis',        t: 'Let Your Life Speak: The Radiance of Lived Ministry' },
+    ]},
+    { time: '5:30–5:50 PM', title: 'Evening Meditation', bldg: 'sanderling', daily: true },
+    { time: '6:00–7:00 PM', title: 'Dinner', bldg: 'crocker', daily: true, note: 'Meal card required' },
+    { time: '7:30–10:00 PM', title: '"Sea of Grass" Social — Acoustic Jam', bldg: 'bonfire',
+      note: 'Outdoors · Woodward / Culligan / Aponte / Harris / Land / Guio · Cash bar' },
+  ],
+  tue: [
+    { time: '7:10–7:30 AM', title: 'Morning Meditation', bldg: 'sanderling', daily: true },
+    { time: '7:30–8:30 AM', title: 'Breakfast', bldg: 'crocker', daily: true, note: 'Meal card required' },
+    { time: '9:20 AM', title: 'Lifetime Service Award — Paula Thompson', bldg: 'merrill',
+      note: 'Presented by Woodward / Culligan / Aponte / Harris / Land / Guio', award: true },
+    { time: '9:35 AM', title: 'Morning Plenary · Merrill Hall', bldg: 'merrill', plenary: true,
+      speaker: 'Diane Labrecque', origin: 'Canada', talk: '"Team Jesus"' },
+    { time: '10:15–11:45 AM', title: 'Morning Workshops', workshops: [
+      { bldg: 'dolphin',  p: 'Bobbie Dreier et al.',              t: 'Daily Urantia Book Prayer Circle' },
+      { bldg: 'acacia',   p: 'André Radatus & Cristina Seaborn',  t: 'Awakening the Leader Within: Emergent Leadership in the Urantia Community' },
+      { bldg: 'toyon',    p: 'Linda Huff',                        t: "A Multifaith Look at Grief and the Soul's Journey through the Mansion Worlds" },
+      { bldg: 'heather',  p: 'Jeremy Daigle',                     t: 'The New Generation of Secondary Workers' },
+      { bldg: 'marlin',   p: 'Adele EerNisse',                    t: 'Having Coffee with Jesus' },
+      { bldg: 'scripps',  p: 'Michael Hill',                      t: 'The Supreme Being and Cosmic Citizenship' },
+      { bldg: 'curlew',   p: 'Alden & Darla Hughes',              t: 'Creating an Awakening World' },
+    ]},
+    { time: '12:00–1:00 PM', title: 'Lunch', bldg: 'crocker', daily: true, note: 'Meal card required' },
+    { time: '2:15 PM', title: 'Afternoon Panel · Merrill Hall', bldg: 'merrill', plenary: true,
+      speaker: 'Spreading the Word through Secondary Works',
+      talk: 'Moderated by Aprilhelen · Hughes / Kneeland / Mathews / Mauroy / Verser' },
+    { time: '3:00–4:30 PM', title: 'Afternoon Workshops', workshops: [
+      { bldg: 'heather',  p: 'Steve Rohrbach & Charles Lehner',   t: 'What Would Jesus Say Today?' },
+      { bldg: 'dolphin',  p: 'Gregory & Oliver Adams',            t: 'Loving the Urantia Papers Without Freezing Them' },
+      { bldg: 'marlin',   p: 'Tom Allen',                         t: 'The Big Book of AA in Harmony with The Urantia Book' },
+      { bldg: 'toyon',    p: 'Al Lockett',                        t: 'Recognizing the Divine Presence in Everyday Moments' },
+      { bldg: 'curlew',   p: 'Diane Labrecque',                   t: 'Living in our HD mode, as Team Jesus, with our human AI' },
+      { bldg: 'scripps',  p: 'Errol Strider',                     t: 'Bringing the Urantia Book teachings to life: Innovative approaches to outreach' },
+      { bldg: 'acacia',   p: 'Meredith Ayers Holland',            t: 'Happiness and other emotions: How knowing ourselves allows space to know God' },
+    ]},
+    { time: '4:30–6:00 PM', title: 'Bonus Workshops', workshops: [
+      { bldg: 'heather',  p: 'Kurt Cira',         t: 'An Introduction to Spiritual Living Support Groups' },
+      { bldg: 'nautilus', p: 'Michael MacIsaac',  t: 'Generations X, Y, and Z Gathering' },
+    ]},
+    { time: '5:30–5:50 PM', title: 'Evening Meditation', bldg: 'sanderling', daily: true },
+    { time: '6:00–7:00 PM', title: 'Dinner', bldg: 'crocker', daily: true, note: 'Meal card required' },
+    { time: '8:00 PM', title: 'Pato Banton Concert', bldg: 'merrill',
+      note: 'Errol Strider opens at 7:30 PM · Culligan / Shinall / Baker at 9:15 PM · Cash bar' },
+  ],
+  wed: [
+    { time: '7:10–7:30 AM', title: 'Morning Meditation', bldg: 'sanderling', daily: true },
+    { time: '7:30–8:30 AM', title: 'Breakfast', bldg: 'crocker', daily: true, note: 'Meal card required' },
+    { time: '9:20 AM', title: 'Morning Plenary · Merrill Hall', bldg: 'merrill', plenary: true,
+      speaker: 'Antoinette Hall', origin: 'USA', talk: '"Emergence into Light: Stillness and Inner Guidance"' },
+    { time: '10:15–11:45 AM', title: 'Morning Workshops', workshops: [
+      { bldg: 'acacia',   p: 'Merritt Horn',                 t: 'In Plain Sight: The Gospels and Part IV Side-By-Side' },
+      { bldg: 'toyon',    p: 'Gilles Mauroy & Aprilhelen',   t: 'Love is sharing our inner lives' },
+      { bldg: 'dolphin',  p: 'Teresa Mathias',               t: 'Painting — A Bridge to Higher Spiritual Reality' },
+      { bldg: 'scripps',  p: 'George & Amalia Bernabela',    t: 'Islands of Coherence: The Melchizedek Emblem and the Garden of Eden' },
+      { bldg: 'curlew',   p: 'Sonny Schneider',              t: 'A Pathway to the Trinity of Trinities' },
+      { bldg: 'marlin',   p: 'Jeffrey Wattles',              t: "Your Mind Emerging: Living Creatively with Mother's Adjutant Mind-Spirits" },
+      { bldg: 'heather',  p: 'Paula Thompson',               t: 'Genuine Unselfish Love: The Path to True Brotherhood' },
+    ]},
+    { time: '12:00–1:00 PM', title: 'Lunch', bldg: 'crocker', daily: true, note: 'Meal card required' },
+    { time: '1:00–2:00 PM', title: 'Bonus Workshop', workshops: [
+      { bldg: 'heather', p: 'Tom Choquette', t: 'Sharing and living the teachings through actual experience' },
+    ]},
+    { time: '2:15 PM', title: 'Afternoon Plenary · Merrill Hall', bldg: 'merrill', plenary: true,
+      speaker: 'Barry Culligan', origin: 'Ireland', talk: '"Taking the Kingdom by Spiritual Assault"' },
+    { time: '3:00–4:30 PM', title: 'Afternoon Workshops', workshops: [
+      { bldg: 'toyon',   p: 'Marvin Gawryn',            t: 'The Global Emergence of a New "Symbolic Spiritual Culture"' },
+      { bldg: 'scripps', p: 'Zac Wheeler',               t: 'Evolution and Revelation Dynamics' },
+      { bldg: 'curlew',  p: 'Greg Adams',                t: 'Beyond Scaffolding: When Revelation Must Become Experience' },
+      { bldg: 'dolphin', p: 'Claire Thurston',           t: 'Creating Your Spiritual Legacy' },
+      { bldg: 'heather', p: 'Gard Jameson & Pato Banton', t: 'The Spirit of Ubuntu in Africa' },
+      { bldg: 'marlin',  p: 'Ramiro Jarkyn',             t: "Living the Father's Will" },
+      { bldg: 'acacia',  p: 'Tom Vasile',                t: 'Marriage and Parenting Emerging into Light and Life' },
+    ]},
+    { time: '4:30–6:00 PM', title: 'Bonus Workshops', workshops: [
+      { bldg: 'heather', p: 'David Kantor',              t: "When Stories Die: Christianity's Crisis and the Urantia Papers" },
+      { bldg: 'toyon',   p: 'Deadrick Baker & Taylor Verser', t: 'Spiritual Influencers' },
+    ]},
+    { time: '5:30–5:50 PM', title: 'Evening Meditation', bldg: 'sanderling', daily: true },
+    { time: '6:00–7:00 PM', title: 'Dinner', bldg: 'crocker', daily: true, note: 'Meal card required' },
+    { time: '7:30 PM', title: '1920s Gala ✨ — "Going Down" · Celestial Artisans', bldg: 'merrill', gala: true,
+      note: 'Musical theater written & directed by Carol Schindler · Light and Life House Band · 1920s attire encouraged · Cash bar' },
+  ],
+  thu: [
+    { time: '7:30–8:30 AM', title: 'Breakfast', bldg: 'crocker', daily: true, note: 'Meal card required' },
+    { time: '8:45 AM sharp', title: 'Group Photo — EVERYONE', bldg: 'hearst',
+      note: 'Outdoors · Meet at back steps of Hearst Social Hall' },
+    { time: '8:45–10:00 AM', title: 'Closing Ceremony', bldg: 'hearst',
+      note: 'Outdoors · Communion (Sally Annabella) · Benediction (Steve Sawyer) · Children\'s Song performance · Big Surprise Finale' },
+    { time: '11:00 AM', title: 'Hotel Check-Out', bldg: 'hearst',
+      note: 'Luggage storage in Marlin (Building 2) until 5:00 PM' },
+    { time: '12:00–1:00 PM', title: 'Final Lunch', bldg: 'crocker', daily: true, note: 'Meal card required' },
+  ],
+};
+
+// ── MAP MARKERS ────────────────────────────────────────────────────────────
+// Two sets: normal view + calibration view
+const normalMarkers = {};   // bldgId → DOM el in normal map
+const calibMarkers  = {};   // bldgId → DOM el in calib map
+
+function buildMarker(id, b, container, clickFn) {
+  const el = document.createElement('div');
+  el.className = 'map-marker';
+  el.textContent = b.num;
+  el.style.left = b.left + '%';
+  el.style.top  = b.top  + '%';
+  el.title = b.name;
+  if (clickFn) el.addEventListener('click', (e) => { e.stopPropagation(); clickFn(id, el); });
+  container.appendChild(el);
+  return el;
+}
+
+const normalWrap = document.getElementById('map-normal-wrap');
+const calibWrap  = document.getElementById('calib-map-wrap');
+
+for (const [id, b] of Object.entries(B)) {
+  normalMarkers[id] = buildMarker(id, b, normalWrap, (bid) => {
+    if (normalMarkers[bid].classList.contains('active')) clearHighlight();
+    else setHighlight(bid);
+  });
+  calibMarkers[id] = buildMarker(id, b, calibWrap, null);
+}
+
+// ── CALIBRATION MODE ───────────────────────────────────────────────────────
+let calibOn  = false;
+let calibSel = null;   // currently selected bldgId for placement
+const calibCoords = {};  // bldgId → {left, top} — updated during session
+
+function buildCalibList() {
+  const list = document.getElementById('calib-bldg-list');
+  list.querySelectorAll('.calib-item').forEach(e => e.remove());
+  for (const [id, b] of Object.entries(B)) {
+    const item = document.createElement('div');
+    item.className = 'calib-item';
+    item.id = 'ci-' + id;
+    item.innerHTML =
+      `<span class="calib-num">${b.num}</span>` +
+      `<span class="calib-name">${b.name}</span>` +
+      `<span class="calib-check" id="ck-${id}"></span>`;
+    item.addEventListener('click', () => selectCalibBldg(id));
+    list.appendChild(item);
+  }
+}
+
+function selectCalibBldg(id) {
+  // Deselect previous
+  if (calibSel) {
+    document.getElementById('ci-' + calibSel)?.classList.remove('waiting');
+    calibMarkers[calibSel]?.classList.remove('waiting-place');
+  }
+  calibSel = id;
+  document.getElementById('ci-' + id)?.classList.add('waiting');
+  calibMarkers[id]?.classList.add('waiting-place');
+  document.getElementById('calib-coords-out').textContent =
+    `← Now click where "${B[id].name}" is on the map`;
+}
+
+calibWrap.addEventListener('click', (e) => {
+  if (!calibSel) return;
+  const rect = calibWrap.getBoundingClientRect();
+  // account for the image's actual rendered offset inside the scrolling wrap
+  const img = document.getElementById('campus-map-img-calib');
+  const imgRect = img.getBoundingClientRect();
+  const lp = ((e.clientX - imgRect.left) / imgRect.width  * 100);
+  const tp = ((e.clientY - imgRect.top)  / imgRect.height * 100);
+
+  // Update both marker sets
+  calibCoords[calibSel] = { left: lp, top: tp };
+  const move = (el) => { el.style.left = lp + '%'; el.style.top = tp + '%'; };
+  move(calibMarkers[calibSel]);
+  move(normalMarkers[calibSel]);
+
+  // Mark as placed
+  const ck = document.getElementById('ck-' + calibSel);
+  if (ck) ck.textContent = '✓';
+  document.getElementById('ci-' + calibSel)?.classList.remove('waiting');
+  document.getElementById('ci-' + calibSel)?.classList.add('placed');
+  calibMarkers[calibSel]?.classList.remove('waiting-place');
+  calibSel = null;
+
+  // Update footer readout
+  updateCalibOut();
+});
+
+function updateCalibOut() {
+  const lines = Object.entries(B).map(([id, b]) => {
+    const c = calibCoords[id];
+    const l = c ? c.left.toFixed(1) : b.left;
+    const t = c ? c.top.toFixed(1)  : b.top;
+    return `  ${id.padEnd(10)}: { left: ${l}, top: ${t} }`;
+  });
+  document.getElementById('calib-coords-out').textContent = lines.join('  |  ');
+}
+
+function copyCoords() {
+  const lines = Object.entries(B).map(([id, b]) => {
+    const c = calibCoords[id];
+    const l = c ? c.left.toFixed(1) : b.left;
+    const t = c ? c.top.toFixed(1)  : b.top;
+    return `  ${id}:    { ..., left: ${l}, top: ${t} }`;
+  });
+  navigator.clipboard.writeText(lines.join('\n')).then(() => {
+    document.querySelector('.copy-btn').textContent = 'Copied!';
+    setTimeout(() => document.querySelector('.copy-btn').textContent = 'Copy all', 2000);
+  });
+}
+
+function toggleCalib() {
+  calibOn = !calibOn;
+  const btn = document.getElementById('calib-btn');
+  btn.classList.toggle('on', calibOn);
+  btn.textContent = calibOn ? '✓ Exit calibration' : '📍 Calibrate pin positions';
+
+  document.getElementById('map-normal').classList.toggle('hidden', calibOn);
+  document.getElementById('map-calib').classList.toggle('visible', calibOn);
+  document.getElementById('calib-footer').style.display = calibOn ? 'flex' : 'none';
+
+  if (calibOn && !document.querySelector('.calib-item')) buildCalibList();
+  if (!calibOn && calibSel) {
+    document.getElementById('ci-' + calibSel)?.classList.remove('waiting');
+    calibMarkers[calibSel]?.classList.remove('waiting-place');
+    calibSel = null;
+  }
+}
+
+// ── HIGHLIGHT LOGIC ────────────────────────────────────────────────────────
+let activeCardEl  = null;
+let activeWsRowEl = null;
+
+function setHighlight(bldgId) {
+  for (const [id, el] of Object.entries(normalMarkers)) {
+    el.classList.toggle('active', id === bldgId);
+  }
+}
+
+function clearHighlight() {
+  for (const el of Object.values(normalMarkers)) el.classList.remove('active');
+}
+
+// ── RENDER EVENTS ──────────────────────────────────────────────────────────
+const DAY_LABELS = {
+  sun: 'Sunday, July 12',
+  mon: 'Monday, July 13',
+  tue: 'Tuesday, July 14',
+  wed: 'Wednesday, July 15',
+  thu: 'Thursday, July 16',
+};
+
+function makeWsRow(ws) {
+  const wb = B[ws.bldg];
+  const row = document.createElement('div');
+  row.className = 'ws-row';
+
+  const badge = document.createElement('span');
+  badge.className = 'ws-bldg';
+  badge.textContent = wb.num;
+
+  const txt = document.createElement('div');
+  txt.className = 'ws-text';
+
+  const p = document.createElement('div');
+  p.className = 'ws-presenter';
+  p.textContent = ws.p;
+
+  const t = document.createElement('div');
+  t.className = 'ws-title-text';
+  t.textContent = ws.t;
+
+  txt.appendChild(p);
+  txt.appendChild(t);
+  row.appendChild(badge);
+  row.appendChild(txt);
+  return row;
+}
+
+function renderDay(dayKey) {
+  const panel = document.getElementById('events-panel');
+  panel.innerHTML = '';
+  activeCardEl  = null;
+  activeWsRowEl = null;
+
+  // Day header
+  const hdr = document.createElement('div');
+  hdr.className = 'day-header';
+  hdr.textContent = DAY_LABELS[dayKey];
+  panel.appendChild(hdr);
+
+  for (const s of SCHEDULE[dayKey]) {
+    const row = document.createElement('div');
+    const typeClass = s.daily ? ' daily' : s.gala ? ' gala' : '';
+    row.className = 'agenda-row' + typeClass;
+
+    // ── time cell ──
+    const tc = document.createElement('div');
+    tc.className = 'agenda-time';
+    tc.textContent = s.time;
+    row.appendChild(tc);
+
+    // ── body cell ──
+    const body = document.createElement('div');
+    body.className = 'agenda-body';
+
+    const bldg = s.bldg ? B[s.bldg] : null;
+
+    // title + badge
+    const hd = document.createElement('div');
+    hd.className = 'agenda-hd';
+
+    const title = document.createElement('div');
+    title.className = 'agenda-title' +
+      (s.plenary ? ' is-plenary' : '') +
+      (s.daily   ? ' is-daily'   : '') +
+      (s.gala    ? ' is-special' : '');
+    title.textContent = s.title;
+    hd.appendChild(title);
+
+    if (bldg && !s.workshops) {
+      const badge = document.createElement('span');
+      badge.className = 'bldg-badge';
+      badge.textContent = bldg.num;
+      badge.title = bldg.name;
+      hd.appendChild(badge);
+    }
+    body.appendChild(hd);
+
+    // location (non-daily, non-plenary, no workshops)
+    if (bldg && !s.daily && !s.plenary && !s.workshops) {
+      const loc = document.createElement('div');
+      loc.className = 'agenda-loc';
+      loc.textContent = bldg.name;
+      body.appendChild(loc);
+    }
+
+    // plenary speaker + talk
+    if (s.plenary || s.award) {
+      if (s.speaker) {
+        const sp = document.createElement('div');
+        sp.className = 'agenda-sub';
+        sp.textContent = s.speaker + (s.origin ? ' · ' + s.origin : '');
+        body.appendChild(sp);
+      }
+      if (s.talk) {
+        const tk = document.createElement('div');
+        tk.className = 'agenda-talk';
+        tk.textContent = s.talk;
+        body.appendChild(tk);
+      }
+      if (bldg) {
+        const loc = document.createElement('div');
+        loc.className = 'agenda-loc';
+        loc.textContent = bldg.name;
+        body.appendChild(loc);
+      }
+    }
+
+    // note
+    if (s.note) {
+      const note = document.createElement('div');
+      note.className = 'agenda-note';
+      note.textContent = s.note;
+      body.appendChild(note);
+    }
+
+    // workshop block
+    if (s.workshops) {
+      const tog = document.createElement('div');
+      tog.className = 'ws-toggle';
+      const cnt = document.createElement('span');
+      cnt.className = 'ws-count';
+      cnt.textContent = s.workshops.length + ' concurrent room' + (s.workshops.length > 1 ? 's' : '');
+      const chv = document.createElement('span');
+      chv.className = 'ws-chevron';
+      chv.textContent = '▼';
+      tog.appendChild(cnt);
+      tog.appendChild(chv);
+      body.appendChild(tog);
+
+      const list = document.createElement('div');
+      list.className = 'ws-list';
+
+      for (const ws of s.workshops) {
+        const wsRow = makeWsRow(ws);
+        wsRow.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (activeWsRowEl) activeWsRowEl.classList.remove('active');
+          if (activeCardEl)  { activeCardEl.classList.remove('active'); activeCardEl = null; }
+          if (activeWsRowEl === wsRow) { activeWsRowEl = null; clearHighlight(); }
+          else { wsRow.classList.add('active'); activeWsRowEl = wsRow; setHighlight(ws.bldg); }
+        });
+        list.appendChild(wsRow);
+      }
+      body.appendChild(list);
+
+      row.addEventListener('click', () => {
+        const wasOpen = row.classList.contains('expanded');
+        row.classList.toggle('expanded');
+        if (!wasOpen && activeCardEl && activeCardEl !== row) {
+          activeCardEl.classList.remove('active'); activeCardEl = null;
+        }
+        if (activeWsRowEl) { activeWsRowEl.classList.remove('active'); activeWsRowEl = null; }
+        if (!row.classList.contains('expanded')) clearHighlight();
+      });
+    } else {
+      row.addEventListener('click', () => {
+        if (!s.bldg) return;
+        if (activeWsRowEl) { activeWsRowEl.classList.remove('active'); activeWsRowEl = null; }
+        if (activeCardEl === row) {
+          row.classList.remove('active'); activeCardEl = null; clearHighlight();
+        } else {
+          if (activeCardEl) activeCardEl.classList.remove('active');
+          row.classList.add('active'); activeCardEl = row; setHighlight(s.bldg);
+        }
+      });
+    }
+
+    row.appendChild(body);
+    panel.appendChild(row);
+  }
+
+  clearHighlight();
+}
+
+// ── DAY TABS ───────────────────────────────────────────────────────────────
+let currentDay = 'sun';
+document.querySelectorAll('.day-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentDay = tab.dataset.day;
+    renderDay(currentDay);
+  });
+});
+
+// Initial render
+renderDay('sun');
+</script>
 </body>
 </html>
