@@ -96,6 +96,24 @@
       white-space: nowrap;
     }
     .quick-nav a:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    .nav-hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.85);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0 0.4rem;
+      line-height: 1;
+      align-items: center;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
 
     /* ── DAY TABS ── */
     .day-nav {
@@ -616,6 +634,28 @@
     @media (max-width: 600px) {
       .map-calib-panel { flex-direction: column; height: auto; }
       .calib-bldg-list { width: 100%; height: 180px; }
+      .quick-nav { justify-content: flex-end; flex-wrap: nowrap; }
+      .nav-hamburger { display: flex; }
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex;
+        position: fixed;
+        top: var(--nav-h);
+        left: 0; right: 0;
+        background: var(--navy);
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.5rem 0;
+        z-index: 199;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      }
+      .nav-links.open a {
+        border-radius: 0;
+        padding: 0.65rem 1.25rem;
+        text-align: left;
+        white-space: normal;
+        border-top: 1px solid rgba(255,255,255,0.08);
+      }
     }
   </style>
 </head>
@@ -635,12 +675,15 @@
 
 <!-- QUICK NAV -->
 <nav class="quick-nav">
-  <a href="#schedule">Schedule</a>
-  <a href="#campus-map">Campus Map</a>
-  <a href="#arrival"        onclick="return goOverview('#arrival')">Before You Arrive</a>
-  <a href="#registration"  onclick="return goOverview('#registration')">Registration</a>
-  <a href="#transportation" onclick="return goOverview('#transportation')">Getting Here</a>
-  <a href="#contact"       onclick="return goOverview('#contact')">Contact</a>
+  <button class="nav-hamburger" onclick="toggleNav()" aria-label="Menu">&#9776;</button>
+  <div class="nav-links">
+    <a href="#schedule">Schedule</a>
+    <a href="#campus-map">Campus Map</a>
+    <a href="#arrival"         onclick="return goOverview('#arrival')">Before You Arrive</a>
+    <a href="#registration"   onclick="return goOverview('#registration')">Registration</a>
+    <a href="#transportation"  onclick="return goOverview('#transportation')">Getting Here</a>
+    <a href="#contact"        onclick="return goOverview('#contact')">Contact</a>
+  </div>
 </nav>
 
 <!-- DAY TABS -->
@@ -1345,6 +1388,21 @@ function goOverview(anchor) {
   if (anchor) setTimeout(() => document.querySelector(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   return false;
 }
+
+// ── MOBILE NAV ─────────────────────────────────────────────────────────────
+function toggleNav() {
+  const links = document.querySelector('.nav-links');
+  const btn   = document.querySelector('.nav-hamburger');
+  const open  = links.classList.toggle('open');
+  btn.innerHTML = open ? '&#215;' : '&#9776;';
+}
+function closeNav() {
+  document.querySelector('.nav-links')?.classList.remove('open');
+  const btn = document.querySelector('.nav-hamburger');
+  if (btn) btn.innerHTML = '&#9776;';
+}
+document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', closeNav));
+document.addEventListener('click', (e) => { if (!e.target.closest('.quick-nav')) closeNav(); });
 
 // Initial render
 renderDay('sun');
