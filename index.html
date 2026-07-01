@@ -193,13 +193,33 @@
     }
 
     /* Normal map view */
-    .map-normal {
+    .map-normal { background: #2a2a2a; }
+    .map-normal-inner {
       position: relative;
+      max-width: 720px;
+      margin: 0 auto;
+      transition: max-width 0.3s ease;
     }
+    .campus-map-section.expanded .map-normal-inner { max-width: 100%; }
     .map-normal img {
       width: 100%;
       display: block;
     }
+    .map-expand-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.8);
+      font-family: Arial, sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.65rem;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .map-expand-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
 
     /* Map tab panel */
     #map-tab-panel {
@@ -715,9 +735,10 @@
 <div class="campus-map-section" id="campus-map">
   <div class="campus-map-hdr">
     <h2>Campus Map · Asilomar Conference Grounds</h2>
+    <button class="map-expand-btn" onclick="toggleMapExpand(this)" title="Expand map">⤢ Expand</button>
   </div>
   <div class="map-normal" id="map-normal">
-    <div style="position:relative;" id="map-normal-wrap">
+    <div class="map-normal-inner" id="map-normal-wrap">
       <img src="campus-map.png" alt="Asilomar Conference Grounds" id="campus-map-img-normal" />
       <!-- normal markers injected by JS -->
     </div>
@@ -1159,6 +1180,12 @@ function copyCoords() {
     document.querySelector('.copy-btn').textContent = 'Copied!';
     setTimeout(() => document.querySelector('.copy-btn').textContent = 'Copy all', 2000);
   });
+}
+
+function toggleMapExpand(btn) {
+  const section = document.getElementById('campus-map');
+  const expanded = section.classList.toggle('expanded');
+  btn.textContent = expanded ? '⤡ Collapse' : '⤢ Expand';
 }
 
 function showOverviewTab() {
